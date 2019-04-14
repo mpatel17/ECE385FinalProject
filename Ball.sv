@@ -1,27 +1,9 @@
-/* This file is edited from lab 8 so that the ball only moves on a key press, otherwise it will stay still */
-/* This is how we want to implement the tanks */
-
-//-------------------------------------------------------------------------
-//    Ball.sv                                                            --
-//    Viral Mehta                                                        --
-//    Spring 2005                                                        --
-//                                                                       --
-//    Modified by Stephen Kempf 03-01-2006                               --
-//                              03-12-2007                               --
-//    Translated by Joe Meng    07-07-2013                               --
-//    Modified by Po-Han Huang  12-08-2017                               --
-//    Spring 2018 Distribution                                           --
-//                                                                       --
-//    For use with ECE 385 Lab 8                                         --
-//    UIUC ECE Department                                                --
-//-------------------------------------------------------------------------
-
-
 module  ball ( input         Clk,                // 50 MHz clock
                              Reset,              // Active-high reset signal
                              frame_clk,          // The clock indicating a new frame (~60Hz)
                input [9:0]   DrawX, DrawY,       // Current pixel coordinates
                output logic  is_ball,            // Whether current pixel belongs to ball or background
+					output logic  is_shooting,
 					input logic [7:0] keycode			 // key that is being pressed
               );
 
@@ -38,6 +20,17 @@ module  ball ( input         Clk,                // 50 MHz clock
     logic [9:0] Ball_X_Pos, Ball_X_Motion, Ball_Y_Pos, Ball_Y_Motion;
     logic [9:0] Ball_X_Pos_in, Ball_X_Motion_in, Ball_Y_Pos_in, Ball_Y_Motion_in;
 
+	 initial begin
+		Ball_X_Pos_in = Ball_X_Center;
+		Ball_X_Pos = Ball_X_Center;
+		Ball_X_Motion_in = 10'd0;
+		Ball_X_Motion = 10'd0;
+		Ball_Y_Pos_in = Ball_Y_Center;
+		Ball_Y_Pos = Ball_Y_Center;
+		Ball_Y_Motion_in = 10'd0;
+		Ball_Y_Motion = 10'd0;
+	 end
+	 
     //////// Do not modify the always_ff blocks. ////////
     // Detect rising edge of frame_clk
     logic frame_clk_delayed, frame_clk_rising_edge;
@@ -53,7 +46,7 @@ module  ball ( input         Clk,                // 50 MHz clock
             Ball_X_Pos <= Ball_X_Center;
             Ball_Y_Pos <= Ball_Y_Center;
             Ball_X_Motion <= 10'd0;
-            Ball_Y_Motion <= 10'd0;
+            Ball_Y_Motion <= Ball_Y_Step;
         end
         else
         begin
@@ -71,31 +64,20 @@ module  ball ( input         Clk,                // 50 MHz clock
         // By default, keep motion and position unchanged
         Ball_X_Pos_in = Ball_X_Pos;
         Ball_Y_Pos_in = Ball_Y_Pos;
-        Ball_X_Motion_in = 0;
-        Ball_Y_Motion_in = 0;
+        Ball_X_Motion_in = Ball_X_Motion;
+        Ball_Y_Motion_in = Ball_Y_Motion;
+		  is_shooting = 1'b0;
 
         // Update position and motion only at rising edge of frame clock
         if (frame_clk_rising_edge)
         begin
-            // Be careful when using comparators with "logic" datatype because compiler treats
-            //   both sides of the operator as UNSIGNED numbers.
-            // e.g. Ball_Y_Pos - Ball_Size <= Ball_Y_Min
-            // If Ball_Y_Pos is 0, then Ball_Y_Pos - Ball_Size will not be -4, but rather a large positive number.
-            if( Ball_Y_Pos + Ball_Size >= Ball_Y_Max )  // Ball is at the bottom edge, BOUNCE!
-                Ball_Y_Motion_in = (~(Ball_Y_Step) + 1'b1);  // 2's complement.
-            else if ( Ball_Y_Pos <= Ball_Y_Min + Ball_Size )  // Ball is at the top edge, BOUNCE!
-                Ball_Y_Motion_in = Ball_Y_Step;
-
-            // TODO: Add other boundary detections and handle keypress here.
-            if( Ball_X_Pos + Ball_Size >= Ball_X_Max )  // Ball is at the right edge, BOUNCE!
-                Ball_X_Motion_in = (~(Ball_X_Step) + 1'b1);  // 2's complement.
-            else if ( Ball_X_Pos <= Ball_X_Min + Ball_Size )  // Ball is at the left edge, BOUNCE!
-                Ball_X_Motion_in = Ball_X_Step;
-
-				// check current motion and whether key is pressed to determine what to set Ball_X/Y_Motion to
+		  
+			  // check if enter key is pressed to change color 
+			  if( keycode == 8'h58 ) begin
+					is_shooting = 1'b1;
+			  end
+			  // check current motion and whether key is pressed to determine what to set Ball_X/Y_Motion to
 				if( keycode == 8'h1A ) begin	// 'W'
-					Ball_X_Pos_in = 0;
-					Ball_Y_Pos_in = 0;
 					Ball_Y_Motion_in = (~(Ball_Y_Step) + 1'b1);
 					Ball_X_Motion_in = 1'b0;
 				end
@@ -111,7 +93,32 @@ module  ball ( input         Clk,                // 50 MHz clock
 					Ball_X_Motion_in = Ball_X_Step;
 					Ball_Y_Motion_in = 1'b0;
 				end
-
+				else begin
+					Ball_X_Motion_in = 1'b0;
+					Ball_Y_Motion_in = 1'b0;
+				end
+            // Be careful when using comparators with "logic" datatype because compiler treats
+            //   both sides of the operator as UNSIGNED numbers.
+            // e.g. Ball_Y_Pos - Ball_Size <= Ball_Y_Min
+            // If Ball_Y_Pos is 0, then Ball_Y_Pos - Ball_Size will not be -4, but rather a large positive number.
+            if( Ball_Y_Pos + Ball_Size >= Ball_Y_Max ) begin // Ball is at the bottom edge, BOUNCE!
+                Ball_Y_Motion_in = (~(Ball_Y_Step) + 1'b1); // 2's complement.
+					 Ball_X_Motion_in = 1'b0; 
+				end
+            else if ( Ball_Y_Pos <= Ball_Y_Min + Ball_Size ) begin  // Ball is at the top edge, BOUNCE!
+                Ball_Y_Motion_in = Ball_Y_Step;
+					 Ball_X_Motion_in = 1'b0;
+				end
+            // TODO: Add other boundary detections and handle keypress here.
+            if( Ball_X_Pos + Ball_Size >= Ball_X_Max ) begin // Ball is at the right edge, BOUNCE!
+                Ball_X_Motion_in = (~(Ball_X_Step) + 1'b1);  // 2's complement.
+					 Ball_Y_Motion_in = 1'b0;
+				end
+            else if ( Ball_X_Pos <= Ball_X_Min + Ball_Size ) begin // Ball is at the left edge, BOUNCE!
+                Ball_X_Motion_in = Ball_X_Step;     
+					 Ball_Y_Motion_in = 1'b0;
+				end
+				
             // Update the ball's position with its motion
 				Ball_X_Pos_in = Ball_X_Pos + Ball_X_Motion;
 				Ball_Y_Pos_in = Ball_Y_Pos + Ball_Y_Motion;
