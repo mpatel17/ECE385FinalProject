@@ -3,6 +3,7 @@ module  tank ( input         Clk,                // 50 MHz clock
                              frame_clk,          // The clock indicating a new frame (~60Hz)
                input [9:0]   DrawX, DrawY,       // Current pixel coordinates
                output logic  is_tank,            // Whether current pixel belongs to ball or background
+	       output logic  is_shooting,	 //Whether enter is pressed and tank is shooting
 					output logic [9:0] tank_X, tank_Y,
 					input logic [7:0] keycode			 // key that is being pressed
               );
@@ -59,11 +60,12 @@ module  tank ( input         Clk,                // 50 MHz clock
   
 	 always_comb
     begin
-        // By default, keep motion and position unchanged
+        // By default, keep motion and position unchanged and not shooting
         X_Pos_in = X_Pos;
         Y_Pos_in = Y_Pos;
         X_Motion_in = X_Motion;
         Y_Motion_in = Y_Motion;
+	is_shooting = 1'b0;
 
         // Update position and motion only at rising edge of frame clock
         if (frame_clk_rising_edge)
@@ -86,9 +88,16 @@ module  tank ( input         Clk,                // 50 MHz clock
 					X_Motion_in = X_Step;
 					Y_Motion_in = 1'b0;
 				end
+				else if( keycode == 8'h58 ) begin // 'Enter'
+				  Ball_X_Motion_in = Ball_X_Prev; //Keeps track of previous x motion, so tank can keep moving in that direction
+				  Ball_Y_Motion_in = Ball_Y_Prev; //Keeps track of previous y motion, so tank can keep moving in that direction
+				  //Bullet is shot
+				  is_shooting = 1'b1; //
+				end
 				else begin
 					X_Motion_in = 1'b0;
 					Y_Motion_in = 1'b0;
+					is_shooting = 1'b0;
 				end
             // Be careful when using comparators with "logic" datatype because compiler treats
             //   both sides of the operator as UNSIGNED numbers.
