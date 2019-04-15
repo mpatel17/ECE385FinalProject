@@ -51,7 +51,7 @@ module  color_mapper ( input              is_ball,            // Whether current
         else 
         begin
 				tank_addr = 18'b0;
-            // Background with nice color gradient
+            // Background is white
             Red = 8'hff; 
             Green = 8'hff;
             Blue = 8'hff;
