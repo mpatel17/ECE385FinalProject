@@ -46,7 +46,7 @@ module  ball ( input         Clk,                // 50 MHz clock
             Ball_X_Pos <= Ball_X_Center;
             Ball_Y_Pos <= Ball_Y_Center;
             Ball_X_Motion <= 10'd0;
-            Ball_Y_Motion <= Ball_Y_Step;
+            Ball_Y_Motion <= 10'd0;
         end
         else
         begin
