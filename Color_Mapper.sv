@@ -14,11 +14,13 @@
 //-------------------------------------------------------------------------
 
 // color_mapper: Decide which color to be output to VGA for each pixel.
-module  color_mapper ( input              is_ball,            // Whether current pixel belongs to ball 
+module  color_mapper ( //input              is_ball,            // Whether current pixel belongs to ball 
                                                               //   or background (computed in ball.sv)
-							  input					is_tank,
+							  input				   is_tank,
+							  input			[2:0] tank_dir,
                        input        [9:0] DrawX, DrawY,       // Current pixel coordinates
 							  input			[9:0] tankX, tankY,
+							  input					Clk,
                        output logic [7:0] VGA_R, VGA_G, VGA_B // VGA RGB output
                      );
     
@@ -27,35 +29,69 @@ module  color_mapper ( input              is_ball,            // Whether current
 	 
     logic [7:0] Red, Green, Blue;
 	 logic [18:0] tank_addr;
-	 logic [23:0] RGB_curr;
+	 logic [23:0] RGB_tanku, RGB_tankr, RGB_tankl, RGB_tankd;
 	     
     // Output colors to VGA
     assign VGA_R = Red;
     assign VGA_G = Green;
     assign VGA_B = Blue;
 	 
-	 frameRAM_Tank_1 tank(.read_address(tank_addr), .Clk(Clk),
-								 .data_Out(RGB_curr)
-								 );
+	 frameRAM_Tank_1 tank_u(.read_address(tank_addr), .Clk(Clk),
+								  .data_Out(RGB_tanku)
+								  );
+	 frameRAM_Tank_2 tank_r(.read_address(tank_addr), .Clk(Clk),
+									.data_Out(RGB_tankr)
+									);
+	 frameRAM_Tank_3 tank_l(.read_address(tank_addr), .Clk(Clk),
+									.data_Out(RGB_tankl)
+									);
+	 frameRAM_Tank_4 tank_d(.read_address(tank_addr), .Clk(Clk),
+									.data_Out(RGB_tankd)
+									);								
     
     // Assign color based on is_ball signal
     always_comb
     begin
-        if (is_tank == 1'b1) 
-        begin
-				tank_addr = (DrawX - tankX) + ((DrawY - tankY) * Width);
-				Red = RGB_curr & 24'hFF0000 >> 5'b10000;
-				Green = RGB_curr & 24'h00FF00 >> 4'b1000;
-				Blue = RGB_curr & 24'h0000FF;
-        end
-        else 
-        begin
-				tank_addr = 18'b0;
-            // Background is white
-            Red = 8'hff; 
-            Green = 8'hff;
-            Blue = 8'hff;
-        end
-    end 
+		tank_addr = (DrawX - tankX) + ((DrawY - tankY) * Width);
+		// Background is white
+		Red = 8'hff; 
+		Green = 8'hff;
+		Blue = 8'hff;
+		
+		if (is_tank == 1'b1) begin
+			
+			case(tank_dir) 
+			
+			3'b001:
+				if (RGB_tanku != 24'hFF0000) begin
+					Red = RGB_tanku & 24'hFF0000 >> 5'b10000;
+					Green = RGB_tanku & 24'h00FF00 >> 4'b1000;
+					Blue = RGB_tanku & 24'h0000FF;
+				end
+      
+			3'b010:
+				if (RGB_tankr != 24'hFF0000) begin
+					Red = RGB_tankr & 24'hFF0000 >> 5'b10000;
+					Green = RGB_tankr & 24'h00FF00 >> 4'b1000;
+					Blue = RGB_tankr & 24'h0000FF;
+				end
+      
+			3'b011:
+				if (RGB_tankl != 24'hFF0000) begin
+					Red = RGB_tankl & 24'hFF0000 >> 5'b10000;
+					Green = RGB_tankl & 24'h00FF00 >> 4'b1000;
+					Blue = RGB_tankl & 24'h0000FF;
+				end
+		
+			3'b100:
+				if (RGB_tankd != 24'hFF0000) begin
+					Red = RGB_tankd & 24'hFF0000 >> 5'b10000;
+					Green = RGB_tankd & 24'h00FF00 >> 4'b1000;
+					Blue = RGB_tankd & 24'h0000FF;
+				end
+			default: ;
+			endcase
+		end
+	end 
     
 endmodule

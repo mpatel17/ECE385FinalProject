@@ -4,7 +4,7 @@
  *
  */
 
-module  frameRAM
+module  frameRAM_Bullet
 (
 		input [4:0] data_In,
 		input [18:0] write_address, read_address,

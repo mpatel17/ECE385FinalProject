@@ -2,8 +2,9 @@ module  tank ( input         Clk,                // 50 MHz clock
                              Reset,              // Active-high reset signal
                              frame_clk,          // The clock indicating a new frame (~60Hz)
                input [9:0]   DrawX, DrawY,       // Current pixel coordinates
-               output logic  is_tank,            // Whether current pixel belongs to ball or background
-	       output logic  is_shooting,	 //Whether enter is pressed and tank is shooting
+               output logic  is_tank,       		// Whether current pixel belongs to tank or background
+					output logic [2:0] tank_dir,
+					output logic  is_shooting,	 		//Whether enter is pressed and tank is shooting
 					output logic [9:0] tank_X, tank_Y,
 					input logic [7:0] keycode			 // key that is being pressed
               );
@@ -21,6 +22,7 @@ module  tank ( input         Clk,                // 50 MHz clock
 
     logic [9:0] X_Pos, X_Motion, Y_Pos, Y_Motion;
     logic [9:0] X_Pos_in, X_Motion_in, Y_Pos_in, Y_Motion_in;
+	 logic [2:0] tank_dir_in;
 
 	 initial begin
 		X_Pos_in = X_Start;
@@ -48,6 +50,7 @@ module  tank ( input         Clk,                // 50 MHz clock
             Y_Pos <= Y_Start;
             X_Motion <= 10'd0;
             Y_Motion <= 10'd0;
+				tank_dir <= 3'b001;
         end
         else
         begin
@@ -55,6 +58,7 @@ module  tank ( input         Clk,                // 50 MHz clock
             Y_Pos <= Y_Pos_in;
             X_Motion <= X_Motion_in;
             Y_Motion <= Y_Motion_in;
+				tank_dir <= tank_dir_in;
         end
     end
   
@@ -63,46 +67,50 @@ module  tank ( input         Clk,                // 50 MHz clock
         // By default, keep motion and position unchanged and not shooting
         X_Pos_in = X_Pos;
         Y_Pos_in = Y_Pos;
-        X_Motion_in = X_Motion;
-        Y_Motion_in = Y_Motion;
-	is_shooting = 1'b0;
+        X_Motion_in = 1'b0;
+        Y_Motion_in = 1'b0;
+		  is_shooting = 1'b0;
+		  tank_dir_in = tank_dir;
 
         // Update position and motion only at rising edge of frame clock
         if (frame_clk_rising_edge)
         begin
 		  
+				
 			  // check current motion and whether key is pressed to determine what to set X/Y_Motion to
 				if( keycode == 8'h1A ) begin	// 'W'
 					Y_Motion_in = (~(Y_Step) + 1'b1);
 					X_Motion_in = 1'b0;
+					tank_dir_in = 3'b001;
 				end
 				else if( keycode == 8'h16 )	begin // 'S'
 					Y_Motion_in = Y_Step;
 					X_Motion_in = 1'b0;
+					tank_dir_in = 3'b100;
 				end
 				else if( keycode == 8'h04 )	begin // 'A'
 					X_Motion_in = (~(X_Step) + 1'b1);
 					Y_Motion_in = 1'b0;
+					tank_dir_in = 3'b011;
 				end
 				else if( keycode == 8'h07 )	begin // 'D'
 					X_Motion_in = X_Step;
 					Y_Motion_in = 1'b0;
+					tank_dir_in = 3'b010;
 				end
-				else if( keycode == 8'h58 ) begin // 'Enter'
-				  Ball_X_Motion_in = Ball_X_Prev; //Keeps track of previous x motion, so tank can keep moving in that direction
-				  Ball_Y_Motion_in = Ball_Y_Prev; //Keeps track of previous y motion, so tank can keep moving in that direction
-				  //Bullet is shot
-				  is_shooting = 1'b1; //
+				
+				if( keycode == 8'h58 ) begin // 'Enter'
+				  X_Motion_in = X_Motion; //Keeps track of previous x motion, so tank can keep moving in that direction
+				  Y_Motion_in = Y_Motion; //Keeps track of previous y motion, so tank can keep moving in that direction
+				  is_shooting = 1'b1; 
 				end
-				else begin
-					X_Motion_in = 1'b0;
-					Y_Motion_in = 1'b0;
-					is_shooting = 1'b0;
-				end
-            // Be careful when using comparators with "logic" datatype because compiler treats
-            //   both sides of the operator as UNSIGNED numbers.
-            // e.g. Y_Pos - Ball_Size <= Y_Min
-            // If Y_Pos is 0, then Y_Pos - Ball_Size will not be -4, but rather a large positive number.
+//				else begin
+//					X_Motion_in = 1'b0;
+//					Y_Motion_in = 1'b0;
+//					is_shooting = 1'b0;
+//					tank_dir = 
+//				end
+
             if( Y_Pos + Height >= Y_Max ) begin // Ball is at the bottom edge, BOUNCE!
                 Y_Motion_in = (~(Y_Step) + 1'b1); // 2's complement.
 					 X_Motion_in = 1'b0; 
@@ -138,10 +146,10 @@ end
     assign W = Width;
 	 assign H = Height;
     always_comb begin
-        if ( DistX <= W && DistY <= H )
-            is_tank = 1'b1;
-        else
+        if ( DistX > W || DistX < 0 || DistY > H || DistY < 0)
             is_tank = 1'b0;
+        else
+            is_tank = 1'b1;;
 
     end
 

@@ -59,9 +59,9 @@ module tanks_toplevel( input               CLOCK_50,
     logic hpi_r, hpi_w, hpi_cs, hpi_reset;
 	 logic [9:0] DrawX, DrawY;
 	 logic [9:0] tank_X, tank_Y;
-    logic is_ball;
 	 logic is_tank;
 	 logic frame_clk;
+	 logic [2:0] tank_dir;
 	
     // Interface between NIOS II and EZ-OTG chip
     hpi_io_intf hpi_io_inst(
@@ -84,7 +84,6 @@ module tanks_toplevel( input               CLOCK_50,
                             .OTG_RST_N(OTG_RST_N)
     );
      
-     // You need to make sure that the port names here match the ports in Qsys-generated codes.
      tanks_soc nios_system(
                              .clk_clk(Clk),         
                              .reset_reset_n(1'b1),    // Never reset NIOS
@@ -128,28 +127,25 @@ module tanks_toplevel( input               CLOCK_50,
 //								.keycode(keycode)
 //								);
 
-	 tank tank_p1(.Clk(Clk), .Reset(Reset_H),
+	 tank tank_p1(.Clk(Clk), .Reset(Reset_h),
 					  .frame_clk(VGA_VS),
 					  .DrawX(DrawX), .DrawY(DrawY),
 					  .is_tank(is_tank),
+					  .tank_dir(tank_dir),
 					  .tank_X(tank_X), .tank_Y(tank_Y),
 					  .keycode(keycode)
 					  );
     
-    color_mapper color_instance(.is_ball(1'b0),
+    color_mapper color_instance(//.is_ball(1'b0),
 											.is_tank(is_tank),
+											.tank_dir(tank_dir),
 											.DrawX(DrawX), .DrawY(DrawY),
 											.tankX(tank_X), .tankY(tank_Y),
+											.Clk(Clk),
 											.VGA_R(VGA_R), .VGA_G(VGA_G), .VGA_B(VGA_B));
     
     // Display keycode on hex display
     HexDriver hex_inst_0 (keycode[3:0], HEX0);
     HexDriver hex_inst_1 (keycode[7:4], HEX1);
     
-    /**************************************************************************************
-        ATTENTION! Please answer the following quesiton in your lab report! Points will be allocated for the answers!
-        Hidden Question #1/2:
-        What are the advantages and/or disadvantages of using a USB interface over PS/2 interface to
-             connect to the keyboard? List any two.  Give an answer in your Post-Lab.
-    **************************************************************************************/
 endmodule

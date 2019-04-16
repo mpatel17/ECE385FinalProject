@@ -16,7 +16,7 @@ logic [23:0] tank_palette [11:0];
 logic [3:0] index;
 
 // mem has width of 4 bits and a total of 2500 addresses
-logic [3:0] mem [0:2499];
+logic [3:0] mem [0:1023];
 
 assign tank_palette[0] = 24'hFF0000;
 assign tank_palette[1] = 24'h000000;
@@ -36,9 +36,9 @@ begin
 	 $readmemh("sprite_bytes/Tank_Image_4.txt", mem);
 end
 
+assign index = mem[read_address];
 
 always_ff @ (posedge Clk) begin
-	index <= mem[read_address];
 	data_Out <= tank_palette[index];
 end
 
