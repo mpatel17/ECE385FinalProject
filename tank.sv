@@ -3,7 +3,7 @@ module  tank ( input         Clk,                // 50 MHz clock
                              frame_clk,          // The clock indicating a new frame (~60Hz)
                input [9:0]   DrawX, DrawY,       // Current pixel coordinates
                output logic  is_tank,       		// Whether current pixel belongs to tank or background
-					output logic [2:0] tank_dir,
+//					output logic [2:0] tank_dir,
 					output logic  is_shooting,	 		//Whether enter is pressed and tank is shooting
 					output logic [9:0] tank_X, tank_Y,
 					input logic [7:0] keycode			 // key that is being pressed
@@ -17,12 +17,12 @@ module  tank ( input         Clk,                // 50 MHz clock
     parameter [9:0] Y_Max = 10'd479;     // Bottommost point on the Y axis
     parameter [9:0] X_Step = 10'd1;      // Step size on the X axis
     parameter [9:0] Y_Step = 10'd1;      // Step size on the Y axis
-	 parameter [9:0] Width = 10'd50;
-	 parameter [9:0] Height = 10'd50;
+	 parameter [9:0] Width = 10'd32;
+	 parameter [9:0] Height = 10'd32;
 
     logic [9:0] X_Pos, X_Motion, Y_Pos, Y_Motion;
     logic [9:0] X_Pos_in, X_Motion_in, Y_Pos_in, Y_Motion_in;
-	 logic [2:0] tank_dir_in;
+//	 logic [2:0] tank_dir_in;
 
 	 initial begin
 		X_Pos_in = X_Start;
@@ -50,7 +50,7 @@ module  tank ( input         Clk,                // 50 MHz clock
             Y_Pos <= Y_Start;
             X_Motion <= 10'd0;
             Y_Motion <= 10'd0;
-				tank_dir <= 3'b001;
+//				tank_dir <= 3'b001;
         end
         else
         begin
@@ -58,7 +58,7 @@ module  tank ( input         Clk,                // 50 MHz clock
             Y_Pos <= Y_Pos_in;
             X_Motion <= X_Motion_in;
             Y_Motion <= Y_Motion_in;
-				tank_dir <= tank_dir_in;
+//				tank_dir <= tank_dir_in;
         end
     end
   
@@ -67,10 +67,10 @@ module  tank ( input         Clk,                // 50 MHz clock
         // By default, keep motion and position unchanged and not shooting
         X_Pos_in = X_Pos;
         Y_Pos_in = Y_Pos;
-        X_Motion_in = 1'b0;
-        Y_Motion_in = 1'b0;
+        X_Motion_in = X_Motion;
+        Y_Motion_in = Y_Motion;
 		  is_shooting = 1'b0;
-		  tank_dir_in = tank_dir;
+//		  tank_dir_in = tank_dir;
 
         // Update position and motion only at rising edge of frame clock
         if (frame_clk_rising_edge)
@@ -81,22 +81,27 @@ module  tank ( input         Clk,                // 50 MHz clock
 				if( keycode == 8'h1A ) begin	// 'W'
 					Y_Motion_in = (~(Y_Step) + 1'b1);
 					X_Motion_in = 1'b0;
-					tank_dir_in = 3'b001;
+//					tank_dir_in = 3'b001;
 				end
 				else if( keycode == 8'h16 )	begin // 'S'
 					Y_Motion_in = Y_Step;
 					X_Motion_in = 1'b0;
-					tank_dir_in = 3'b100;
+//					tank_dir_in = 3'b100;
 				end
 				else if( keycode == 8'h04 )	begin // 'A'
 					X_Motion_in = (~(X_Step) + 1'b1);
 					Y_Motion_in = 1'b0;
-					tank_dir_in = 3'b011;
+//					tank_dir_in = 3'b011;
 				end
 				else if( keycode == 8'h07 )	begin // 'D'
 					X_Motion_in = X_Step;
 					Y_Motion_in = 1'b0;
-					tank_dir_in = 3'b010;
+//					tank_dir_in = 3'b010;
+				end
+				else begin
+					X_Motion_in = 1'b0;
+					Y_Motion_in = 1'b0;
+					is_shooting = 1'b0;
 				end
 				
 				if( keycode == 8'h58 ) begin // 'Enter'
@@ -104,12 +109,7 @@ module  tank ( input         Clk,                // 50 MHz clock
 				  Y_Motion_in = Y_Motion; //Keeps track of previous y motion, so tank can keep moving in that direction
 				  is_shooting = 1'b1; 
 				end
-//				else begin
-//					X_Motion_in = 1'b0;
-//					Y_Motion_in = 1'b0;
-//					is_shooting = 1'b0;
-//					tank_dir = 
-//				end
+				
 
             if( Y_Pos + Height >= Y_Max ) begin // Ball is at the bottom edge, BOUNCE!
                 Y_Motion_in = (~(Y_Step) + 1'b1); // 2's complement.
@@ -128,7 +128,6 @@ module  tank ( input         Clk,                // 50 MHz clock
 					 Y_Motion_in = 1'b0;
 				end
 				
-            // Update the ball's position with its motion
 				X_Pos_in = X_Pos + X_Motion;
 				Y_Pos_in = Y_Pos + Y_Motion;
         end
@@ -137,6 +136,7 @@ end
 
 	 assign tank_X = X_Pos;
 	 assign tank_Y = Y_Pos;
+	 
     // Compute whether the pixel corresponds to ball or background
     /* Since the multiplicants are required to be signed, we have to first cast them
        from logic to int (signed by default) before they are multiplied. */
@@ -146,10 +146,10 @@ end
     assign W = Width;
 	 assign H = Height;
     always_comb begin
-        if ( DistX > W || DistX < 0 || DistY > H || DistY < 0)
-            is_tank = 1'b0;
+        if ( DistX <= W && DistX >= 0 && DistY <= H && DistY >= 0)
+            is_tank = 1'b1;
         else
-            is_tank = 1'b1;;
+            is_tank = 1'b0;;
 
     end
 
