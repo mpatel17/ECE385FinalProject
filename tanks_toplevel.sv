@@ -61,7 +61,7 @@ module tanks_toplevel( input               CLOCK_50,
 	 logic [9:0] tank_X, tank_Y;
 	 logic is_tank;
 	 logic frame_clk;
-//	 logic [2:0] tank_dir;
+	 logic [2:0] tank_dir;
 	
     // Interface between NIOS II and EZ-OTG chip
     hpi_io_intf hpi_io_inst(
@@ -131,14 +131,14 @@ module tanks_toplevel( input               CLOCK_50,
 					  .frame_clk(VGA_VS),
 					  .DrawX(DrawX), .DrawY(DrawY),
 					  .is_tank(is_tank),
-//					  .tank_dir(tank_dir),
+					  .tank_dir(tank_dir),
 					  .tank_X(tank_X), .tank_Y(tank_Y),
 					  .keycode(keycode)
 					  );
     
     color_mapper color_instance(//.is_ball(1'b0),
 											.is_tank(is_tank),
-//											.tank_dir(tank_dir),
+											.tank_dir(tank_dir),
 											.DrawX(DrawX), .DrawY(DrawY),
 											.tankX(tank_X), .tankY(tank_Y),
 											.Clk(Clk),

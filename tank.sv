@@ -3,7 +3,7 @@ module  tank ( input         Clk,                // 50 MHz clock
                              frame_clk,          // The clock indicating a new frame (~60Hz)
                input [9:0]   DrawX, DrawY,       // Current pixel coordinates
                output logic  is_tank,       		// Whether current pixel belongs to tank or background
-//					output logic [2:0] tank_dir,
+					output logic [2:0] tank_dir,
 					output logic  is_shooting,	 		//Whether enter is pressed and tank is shooting
 					output logic [9:0] tank_X, tank_Y,
 					input logic [7:0] keycode			 // key that is being pressed
@@ -22,7 +22,7 @@ module  tank ( input         Clk,                // 50 MHz clock
 
     logic [9:0] X_Pos, X_Motion, Y_Pos, Y_Motion;
     logic [9:0] X_Pos_in, X_Motion_in, Y_Pos_in, Y_Motion_in;
-//	 logic [2:0] tank_dir_in;
+	 logic [2:0] tank_dir_in;
 
 	 initial begin
 		X_Pos_in = X_Start;
@@ -50,7 +50,7 @@ module  tank ( input         Clk,                // 50 MHz clock
             Y_Pos <= Y_Start;
             X_Motion <= 10'd0;
             Y_Motion <= 10'd0;
-//				tank_dir <= 3'b001;
+				tank_dir <= 3'b001;
         end
         else
         begin
@@ -58,7 +58,7 @@ module  tank ( input         Clk,                // 50 MHz clock
             Y_Pos <= Y_Pos_in;
             X_Motion <= X_Motion_in;
             Y_Motion <= Y_Motion_in;
-//				tank_dir <= tank_dir_in;
+				tank_dir <= tank_dir_in;
         end
     end
   
@@ -70,7 +70,7 @@ module  tank ( input         Clk,                // 50 MHz clock
         X_Motion_in = X_Motion;
         Y_Motion_in = Y_Motion;
 		  is_shooting = 1'b0;
-//		  tank_dir_in = tank_dir;
+		  tank_dir_in = tank_dir;
 
         // Update position and motion only at rising edge of frame clock
         if (frame_clk_rising_edge)
@@ -81,22 +81,22 @@ module  tank ( input         Clk,                // 50 MHz clock
 				if( keycode == 8'h1A ) begin	// 'W'
 					Y_Motion_in = (~(Y_Step) + 1'b1);
 					X_Motion_in = 1'b0;
-//					tank_dir_in = 3'b001;
+					tank_dir_in = 3'b001;
 				end
 				else if( keycode == 8'h16 )	begin // 'S'
 					Y_Motion_in = Y_Step;
 					X_Motion_in = 1'b0;
-//					tank_dir_in = 3'b100;
+					tank_dir_in = 3'b100;
 				end
 				else if( keycode == 8'h04 )	begin // 'A'
 					X_Motion_in = (~(X_Step) + 1'b1);
 					Y_Motion_in = 1'b0;
-//					tank_dir_in = 3'b011;
+					tank_dir_in = 3'b011;
 				end
 				else if( keycode == 8'h07 )	begin // 'D'
 					X_Motion_in = X_Step;
 					Y_Motion_in = 1'b0;
-//					tank_dir_in = 3'b010;
+					tank_dir_in = 3'b010;
 				end
 				else begin
 					X_Motion_in = 1'b0;
@@ -135,7 +135,7 @@ module  tank ( input         Clk,                // 50 MHz clock
 end
 
 	 assign tank_X = X_Pos;
-	 assign tank_Y = Y_Pos;
+	 assign tank_Y = Y_Pos; 
 	 
     // Compute whether the pixel corresponds to ball or background
     /* Since the multiplicants are required to be signed, we have to first cast them
