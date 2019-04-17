@@ -127,14 +127,14 @@ module tanks_toplevel( input               CLOCK_50,
 //								.keycode(keycode)
 //								);
 
-	 tank tank_p1(.Clk(Clk), .Reset(Reset_h),
-					  .frame_clk(VGA_VS),
-					  .DrawX(DrawX), .DrawY(DrawY),
-					  .is_tank(is_tank),
-					  .tank_dir(tank_dir),
-					  .tank_X(tank_X), .tank_Y(tank_Y),
-					  .keycode(keycode)
-					  );
+	 tank_key tank_p1(.Clk(Clk), .Reset(Reset_h),
+						  .frame_clk(VGA_VS),
+						  .DrawX(DrawX), .DrawY(DrawY),
+						  .is_tank(is_tank),
+						  .tank_dir(tank_dir),
+						  .tank_X(tank_X), .tank_Y(tank_Y),
+						  .keycode(keycode)
+						  );
     
     color_mapper color_instance(//.is_ball(1'b0),
 											.is_tank(is_tank),
