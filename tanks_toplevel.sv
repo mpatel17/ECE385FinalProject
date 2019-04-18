@@ -62,6 +62,8 @@ module tanks_toplevel( input               CLOCK_50,
 	 logic is_tank1, is_tank2;
 	 logic frame_clk;
 	 logic [2:0] tank_dir1, tank_dir2;
+	 logic [7:0] count;
+	 logic Clk_2;
 	
     // Interface between NIOS II and EZ-OTG chip
     hpi_io_intf hpi_io_inst(
@@ -142,6 +144,8 @@ module tanks_toplevel( input               CLOCK_50,
 						  .is_tank(is_tank2),
 						  .tank_dir(tank_dir2),
 						  .tank_X(tank_X2), .tank_Y(tank_Y2),
+						  .count(count),
+						  .Clk_2(Clk_2)
 						  );
     
     color_mapper color_instance(//.is_ball(1'b0),
@@ -153,7 +157,7 @@ module tanks_toplevel( input               CLOCK_50,
 											.VGA_R(VGA_R), .VGA_G(VGA_G), .VGA_B(VGA_B));
     
     // Display keycode on hex display
-    HexDriver hex_inst_0 (keycode[3:0], HEX0);
-    HexDriver hex_inst_1 (keycode[7:4], HEX1);
+    HexDriver hex_inst_0 (count[3:0], HEX0);
+    HexDriver hex_inst_1 (count[7:4], HEX1);
     
 endmodule

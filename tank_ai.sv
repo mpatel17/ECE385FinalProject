@@ -5,7 +5,9 @@ module tank_ai ( input         Clk,                // 50 MHz clock
 						output logic  is_tank,       		// Whether current pixel belongs to tank or background
 						output logic [2:0] tank_dir,
 						output logic  is_shooting,	 		//Whether enter is pressed and tank is shooting
-						output logic [9:0] tank_X, tank_Y
+						output logic [9:0] tank_X, tank_Y,
+						output logic [7:0] count,
+						output logic Clk_2
 						);
 
 	parameter [9:0] X_Start = 10'd100;
@@ -22,9 +24,9 @@ module tank_ai ( input         Clk,                // 50 MHz clock
 	logic [9:0] X_Pos, X_Motion, Y_Pos, Y_Motion;
    logic [9:0] X_Pos_in, X_Motion_in, Y_Pos_in, Y_Motion_in;
 	logic [2:0] tank_dir_in;
-	logic [7:0] count, next_count;
-	logic Clk_2;
-	logic [13:0] counter;
+	logic [7:0] next_count; // count;
+//	logic Clk_2;
+	logic [19:0] counter;
 	
 	enum logic [2:0] {UP, RIGHT, DOWN, LEFT, PAUSE1, PAUSE2, PAUSE3, PAUSE4} State, Next_state;
 	
@@ -39,6 +41,8 @@ module tank_ai ( input         Clk,                // 50 MHz clock
 		Y_Motion = 10'd0;
 		counter = 14'd0;
 		Clk_2 = 1'b0;
+		tank_dir = 3'd1;
+		count = 8'h00;
 	 end
 	 
 	 // Detect rising edge of frame_clk
@@ -50,8 +54,8 @@ module tank_ai ( input         Clk,                // 50 MHz clock
 	 
 	 always_ff @ (posedge Clk)
 	 begin
-	 if(counter < 10000)
-		counter = counter + 1; 
+	 if(counter < 20'd1000000)
+		counter = counter + 1'b1; 
 	 else 
 		counter = 0; 
 		Clk_2 = (Clk_2 + 1) % 2 ; 
@@ -85,7 +89,7 @@ module tank_ai ( input         Clk,                // 50 MHz clock
 		Next_state = State;
 		X_Pos_in = X_Pos;
 		Y_Pos_in = Y_Pos;
-		next_count = 8'h00;
+		next_count = count;
 		tank_dir_in = tank_dir;
 		X_Motion_in = X_Motion;
 		Y_Motion_in = Y_Motion;
@@ -110,34 +114,34 @@ module tank_ai ( input         Clk,                // 50 MHz clock
 					else
 						Next_state = RIGHT;
 				end
-				
-				DOWN:
-				begin
-					if (count > 8'd200)
-						Next_state = PAUSE3;
-					else
-						Next_state = DOWN;
-				end
-				
-				LEFT:
-				begin
-					if (count > 8'd100)
-						Next_state = PAUSE4;
-					else
-						Next_state = LEFT;
-				end 
+//				
+//				DOWN:
+//				begin
+//					if (count > 8'd200)
+//						Next_state = PAUSE3;
+//					else
+//						Next_state = DOWN;
+//				end
+//				
+//				LEFT:
+//				begin
+//					if (count > 8'd100)
+//						Next_state = PAUSE4;
+//					else
+//						Next_state = LEFT;
+//				end 
 				
 				PAUSE1:
 					Next_state = RIGHT;
 					
 				PAUSE2:
-					Next_state = DOWN;
+					Next_state = UP;//DOWN;
 					
-				PAUSE3:
-					Next_state = LEFT;
-				
-				PAUSE4:
-					Next_state = UP;
+//				PAUSE3:
+//					Next_state = UP; //LEFT;
+//				
+//				PAUSE4:
+//					Next_state = UP;
 				
 				default: ;
 			endcase
@@ -165,27 +169,27 @@ module tank_ai ( input         Clk,                // 50 MHz clock
 				PAUSE2:
 					next_count = 8'h00;
 				
-				DOWN:
-				begin
-					next_count = count + 1'b1;
-					Y_Motion_in = Y_Step;
-					X_Motion_in = 10'd0;
-					tank_dir_in = 3'd4;
-				end
+//				DOWN:
+//				begin
+//					next_count = count + 1'b1;
+//					Y_Motion_in = Y_Step;
+//					X_Motion_in = 10'd0;
+//					tank_dir_in = 3'd4;
+//				end
+//				
+//				PAUSE3:
+//					next_count = 8'h00;
 				
-				PAUSE3:
-					next_count = 8'h00;
-				
-				LEFT:
-				begin
-					next_count = count + 1'b1;
-					Y_Motion_in = 10'd0;
-					X_Motion_in = (~(X_Step) + 1'b1);
-					tank_dir_in = 3'd3;
-				end
-				
-				PAUSE4:
-					next_count = 8'h00;
+//				LEFT:
+//				begin
+//					next_count = count + 1'b1;
+//					Y_Motion_in = 10'd0;
+//					X_Motion_in = (~(X_Step) + 1'b1);
+//					tank_dir_in = 3'd3;
+//				end
+//				
+//				PAUSE4:
+//					next_count = 8'h00;
 				
 				default: ;
 			endcase 
