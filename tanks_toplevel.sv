@@ -58,10 +58,10 @@ module tanks_toplevel( input               CLOCK_50,
     logic [15:0] hpi_data_in, hpi_data_out;
     logic hpi_r, hpi_w, hpi_cs, hpi_reset;
 	 logic [9:0] DrawX, DrawY;
-	 logic [9:0] tank_X, tank_Y;
-	 logic is_tank;
+	 logic [9:0] tank_X1, tank_X2, tank_Y1, tank_Y2;
+	 logic is_tank1, is_tank2;
 	 logic frame_clk;
-	 logic [2:0] tank_dir;
+	 logic [2:0] tank_dir1, tank_dir2;
 	
     // Interface between NIOS II and EZ-OTG chip
     hpi_io_intf hpi_io_inst(
@@ -130,17 +130,25 @@ module tanks_toplevel( input               CLOCK_50,
 	 tank_key tank_p1(.Clk(Clk), .Reset(Reset_h),
 						  .frame_clk(VGA_VS),
 						  .DrawX(DrawX), .DrawY(DrawY),
-						  .is_tank(is_tank),
-						  .tank_dir(tank_dir),
-						  .tank_X(tank_X), .tank_Y(tank_Y),
+						  .is_tank(is_tank1),
+						  .tank_dir(tank_dir1),
+						  .tank_X(tank_X1), .tank_Y(tank_Y1),
 						  .keycode(keycode)
+						  );
+						  
+	 tank_ai tank_p2(.Clk(Clk), .Reset(Reset_h),
+						  .frame_clk(VGA_VS),
+						  .DrawX(DrawX), .DrawY(DrawY),
+						  .is_tank(is_tank2),
+						  .tank_dir(tank_dir2),
+						  .tank_X(tank_X2), .tank_Y(tank_Y2),
 						  );
     
     color_mapper color_instance(//.is_ball(1'b0),
-											.is_tank(is_tank),
-											.tank_dir(tank_dir),
+											.is_tank1(is_tank1), .is_tank2(is_tank2),
+											.tank_dir1(tank_dir1), .tank_dir2(tank_dir2),
 											.DrawX(DrawX), .DrawY(DrawY),
-											.tankX(tank_X), .tankY(tank_Y),
+											.tankX1(tank_X1), .tankX2(tank_X2), .tankY1(tank_Y1), .tankY2(tank_Y2),
 											.Clk(Clk),
 											.VGA_R(VGA_R), .VGA_G(VGA_G), .VGA_B(VGA_B));
     

@@ -33,6 +33,8 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 		Y_Pos = Y_Start;
 		Y_Motion_in = 10'd0;
 		Y_Motion = 10'd0;
+		tank_dir = 3'd1;
+		tank_dir_in = 3'd1;
 	 end
 	 
     // Detect rising edge of frame_clk
@@ -50,7 +52,7 @@ module  tank_key ( input         Clk,                // 50 MHz clock
             Y_Pos <= Y_Start;
             X_Motion <= 10'd0;
             Y_Motion <= 10'd0;
-				tank_dir <= 3'b001;
+				tank_dir <= 3'd1;
         end
         else
         begin
@@ -81,22 +83,22 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 				if( keycode == 8'h1A ) begin	// 'W'
 					Y_Motion_in = (~(Y_Step) + 1'b1);
 					X_Motion_in = 1'b0;
-					tank_dir_in = 3'b001;
+					tank_dir_in = 3'd1;
 				end
 				else if( keycode == 8'h16 )	begin // 'S'
 					Y_Motion_in = Y_Step;
 					X_Motion_in = 1'b0;
-					tank_dir_in = 3'b100;
+					tank_dir_in = 3'd4;
 				end
 				else if( keycode == 8'h04 )	begin // 'A'
 					X_Motion_in = (~(X_Step) + 1'b1);
 					Y_Motion_in = 1'b0;
-					tank_dir_in = 3'b011;
+					tank_dir_in = 3'd3;
 				end
 				else if( keycode == 8'h07 )	begin // 'D'
 					X_Motion_in = X_Step;
 					Y_Motion_in = 1'b0;
-					tank_dir_in = 3'b010;
+					tank_dir_in = 3'd2;
 				end
 				else begin
 					X_Motion_in = 1'b0;
@@ -150,7 +152,6 @@ end
             is_tank = 1'b1;
         else
             is_tank = 1'b0;;
-
     end
 
 endmodule
