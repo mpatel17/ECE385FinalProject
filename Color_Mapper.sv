@@ -16,7 +16,7 @@
 // color_mapper: Decide which color to be output to VGA for each pixel.
 module  color_mapper ( //input              is_ball,            // Whether current pixel belongs to ball
                                                               //   or background (computed in ball.sv)
-							  input				   is_tank1, is_tank2,
+							  input				   is_tank1, is_tank2, is_shooting1, is_shooting2,
 							  input			[2:0] tank_dir1, tank_dir2,
                        input        [9:0] DrawX, DrawY,       // Current pixel coordinates
 							  input			[9:0] tankX1, tankX2, tankY1, tankY2,
@@ -127,10 +127,13 @@ module  color_mapper ( //input              is_ball,            // Whether curre
 					Green = RGB_tankd & 24'h00FF00 >> 4'd8;
 					Blue = RGB_tankd & 24'h0000FF;
 				end
+				default: ;
+			endcase
+
 			else if (is_tank3 == 1'b1 && mode == 1'b1) begin
 				tank_addr = (DrawX - tankX3) + ((DrawY - tankY3) << 3'd5);
 
-				case(tank_dir3) 
+				case(tank_dir3)
 				3'b001:
 					if (RGB_tanku != 24'hFF0000) begin
 						Red = RGB_tanku & 24'hFF0000 >> 5'd16;

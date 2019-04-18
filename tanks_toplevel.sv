@@ -134,6 +134,7 @@ module tanks_toplevel( input               CLOCK_50,
 						  .DrawX(DrawX), .DrawY(DrawY),
 						  .is_tank(is_tank1),
 						  .tank_dir(tank_dir1),
+              .is_shooting(is_shooting1),
 						  .tank_X(tank_X1), .tank_Y(tank_Y1),
 						  .keycode(keycode)
 						  );
@@ -143,6 +144,7 @@ module tanks_toplevel( input               CLOCK_50,
              .DrawX(DrawX), .DrawY(DrawY),
              .is_tank(is_tank3),
              .tank_dir(tank_dir3),
+             .is_shooting(is_shooting2),
              .tank_X(tank_X3), .tank_Y(tank_Y3),
              .keycode(keycode)
              );
@@ -159,6 +161,7 @@ module tanks_toplevel( input               CLOCK_50,
 
     color_mapper color_instance(//.is_ball(1'b0),
 											.is_tank1(is_tank1), .is_tank2(is_tank2),
+                      .is_shooting1(is_shooting1), .is_shooting2(is_shooting2),
 											.tank_dir1(tank_dir1), .tank_dir2(tank_dir2),
 											.DrawX(DrawX), .DrawY(DrawY),
 											.tankX1(tank_X1), .tankX2(tank_X2), .tankY1(tank_Y1), .tankY2(tank_Y2),
