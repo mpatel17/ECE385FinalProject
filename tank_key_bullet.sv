@@ -25,8 +25,8 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 
 
     logic [9:0] X_Pos, X_Motion, Y_Pos, Y_Motion;
-		logic [9:0] X_Bullet_dir, Y_Bullet_dir, X_Bullet_in, Y_Bullet_in, X_Bullet, Y_Bullet;
-    logic [9:0] X_Pos_in, X_Motion_in, Y_Pos_in, Y_Motion_in;
+		logic [9:0] X_Bullet_in, Y_Bullet_in, X_Bullet, Y_Bullet;
+    logic [9:0] X_Pos_in, X_Motion_in, Y_Pos_in, Y_Motion_in, X_Bullet_Mot_In, X_Bullet_Mot, Y_Bullet_Mot_In, Y_Bullet_Mot;
 	 logic [2:0] tank_dir_in;
 
 	 initial begin
@@ -38,6 +38,14 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 		Y_Pos = Y_Start;
 		Y_Motion_in = 10'd0;
 		Y_Motion = 10'd0;
+		X_Bullet_in = 10'd0;
+		Y_Bullet_in = 10'd0;
+		X_Bullet = 10'd0;
+		Y_Bullet = 10'd0
+		X_Bullet_Mot_In = 10'd0;
+		Y_Bullet_Mot_In = 10'd0;
+		X_Bullet_Mot = 10'd0;
+		Y_Bullet_Mot = 10'd0;
 		tank_dir = 3'd1;
 		tank_dir_in = 3'd1;
 	 end
@@ -57,6 +65,10 @@ module  tank_key ( input         Clk,                // 50 MHz clock
             Y_Pos <= Y_Start;
             X_Motion <= 10'd0;
             Y_Motion <= 10'd0;
+						X_Bullet <= 10'd0;
+						Y_Bullet <= 10'd0;
+						X_Bullet_Mot = 10'd0;
+						Y_Bullet_Mot = 10'd0;
 				tank_dir <= 3'd1;
         end
         else
@@ -67,7 +79,9 @@ module  tank_key ( input         Clk,                // 50 MHz clock
             Y_Motion <= Y_Motion_in;
 						X_Bullet <= X_Bullet_in;
 						Y_Bullet <= Y_Bullet_in;
-				tank_dir <= tank_dir_in;
+						X_Bullet_Mot <= X_Bullet_Mot_In;
+						Y_Bullet_Mot <= Y_Bullet_Mot_In;
+						tank_dir <= tank_dir_in;
         end
     end
 
@@ -80,8 +94,10 @@ module  tank_key ( input         Clk,                // 50 MHz clock
         Y_Motion_in = Y_Motion;
 				X_Bullet_in = X_Bullet;
 				Y_Bullet_in = Y_Bullet;
-		  is_shooting = 1'b0;
-		  tank_dir_in = tank_dir;
+				X_Bullet_Mot_In = X_Bullet_Mot;
+				Y_Bullet_Mot_In = Y_Bullet_Mot;
+		  	is_shooting = 1'b0;
+		  	tank_dir_in = tank_dir;
 
         // Update position and motion only at rising edge of frame clock
         if (frame_clk_rising_edge)
@@ -93,29 +109,29 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 					Y_Motion_in = (~(Y_Step) + 1'b1);
 					X_Motion_in = 1'b0;
 					tank_dir_in = 3'd1;
-					X_Bullet_dir = X_Pos_in + 9'h10; //Bullet comes out of top center
-					Y_Bullet_dir = Y_Pos_in; //Bullet comes out of top center
+					X_Bullet_in = X_Pos_in + 9'h10; //Bullet comes out of top center
+					Y_Bullet_in = Y_Pos_in; //Bullet comes out of top center
 				end
 				else if( keycode == 8'h16 )	begin // 'S'
 					Y_Motion_in = Y_Step;
 					X_Motion_in = 1'b0;
 					tank_dir_in = 3'd4;
-					X_Bullet_dir = X_Pos_in + 9'h10; //Bullet comes out of bottom center
-					Y_Bullet_dir = Y_Pos_in + 9'h20; //Bullet comes out of bottom center
+					X_Bullet_in = X_Pos_in + 9'h10; //Bullet comes out of bottom center
+					Y_Bullet_in = Y_Pos_in + 9'h20; //Bullet comes out of bottom center
 				end
 				else if( keycode == 8'h04 )	begin // 'A'
 					X_Motion_in = (~(X_Step) + 1'b1);
 					Y_Motion_in = 1'b0;
 					tank_dir_in = 3'd3;
-					X_Bullet_dir = X_Pos_in; //Bullet comes out of left center
-					Y_Bullet_dir = Y_Pos_in + 9'h10; //Bullet comes out of left center
+					X_Bullet_in = X_Pos_in; //Bullet comes out of left center
+					Y_Bullet_in = Y_Pos_in + 9'h10; //Bullet comes out of left center
 				end
 				else if( keycode == 8'h07 )	begin // 'D'
 					X_Motion_in = X_Step;
 					Y_Motion_in = 1'b0;
 					tank_dir_in = 3'd2;
-					X_Bullet_dir = X_Pos_in + 9'h20; //Bullet comes out of right center
-					Y_Bullet_dir = Y_Pos_in + 9'h10; //Bullet comes out of right center
+					X_Bullet_in = X_Pos_in + 9'h20; //Bullet comes out of right center
+					Y_Bullet_in = Y_Pos_in + 9'h10; //Bullet comes out of right center
 				end
 				else begin
 					X_Motion_in = 1'b0;
@@ -127,6 +143,21 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 				  X_Motion_in = X_Motion; //Keeps track of previous x motion, so tank can keep moving in that direction
 				  Y_Motion_in = Y_Motion; //Keeps track of previous y motion, so tank can keep moving in that direction
 				  is_shooting = 1'b1;
+					case (tank_dir_in)
+						3'd1:
+							X_Bullet_Mot_In = 1'b0;
+							Y_Bullet_Mot_In = (~(Y_Step) + 1'b1);
+						3'd2:
+							X_Bullet_Mot_In = X_Step;
+							Y_Bullet_Mot_In = 1'b0;
+						3'd3:
+							X_Bullet_Mot_In = (~(X_Step) + 1'b1);
+							Y_Bullet_Mot_In = 1'b0;
+						3'd4:
+							X_Bullet_Mot_In = 1'b0;
+							Y_Bullet_Mot_In = Y_Step;
+						default: ;
+					endcase
 				end
 
 
@@ -149,8 +180,9 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 
 				X_Pos_in = X_Pos + X_Motion;
 				Y_Pos_in = Y_Pos + Y_Motion;
-				X_Bullet_in = X_Bullet_dir;	//Bullet will come out of appropriate direction
-				Y_Bullet_in = Y_Bullet_dir; //Bullet will come out of appropriate direction
+				X_Bullet_in = X_Bullet + X_Bullet_Mot;	//Bullet will come out of appropriate direction
+				Y_Bullet_in = Y_Bullet + Y_Bullet_Mot; //Bullet will come out of appropriate direction
+
         end
 
 end
