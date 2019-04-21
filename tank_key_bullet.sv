@@ -1,33 +1,35 @@
-module  tank_key ( input         Clk,                // 50 MHz clock
-										  Reset,              // Active-high reset signal
-										  frame_clk,          // The clock indicating a new frame (~60Hz)
-						input [9:0]   DrawX, DrawY,       // Current pixel coordinates
-						output logic  is_tank,       		// Whether current pixel belongs to tank or background
-						output logic [2:0] tank_dir,
-						output logic  is_shooting,	 		//Whether enter is pressed and tank is shooting
-						output logic is_bullet,
-						output logic [9:0] tank_X, tank_Y,
-						input logic [7:0] keycode			 // key that is being pressed
+module  tank_key (	input         Clk,                // 50 MHz clock
+										Reset,              // Active-high reset signal
+										frame_clk,          // The clock indicating a new frame (~60Hz)
+										input [9:0]   DrawX, DrawY,       // Current pixel coordinates
+										output logic  is_tank,       		// Whether current pixel belongs to tank or background
+										output logic [2:0] tank_dir,
+										output logic  is_shooting,	 		//Whether enter is pressed and tank is shooting
+										output logic is_bullet,
+										output logic hit,
+										output logic [9:0] tank_X, tank_Y,
+										input logic [7:0] keycode			 // key that is being pressed
 					  );
 
-	 parameter [9:0] X_Start = 10'd500;
-	 parameter [9:0] Y_Start = 10'd240;
-    parameter [9:0] X_Min = 10'd0;       // Leftmost point on the X axis
-    parameter [9:0] X_Max = 10'd639;     // Rightmost point on the X axis
-    parameter [9:0] Y_Min = 10'd0;       // Topmost point on the Y axis
-    parameter [9:0] Y_Max = 10'd479;     // Bottommost point on the Y axis
-    parameter [9:0] X_Step = 10'd1;      // Step size on the X axis
-    parameter [9:0] Y_Step = 10'd1;      // Step size on the Y axis
-	 parameter [9:0] Width = 10'd32;
-	 parameter [9:0] Height = 10'd32;
-	 parameter [9:0] Width_Bullet = 10'd16;
-	 parameter [9:0] Height_Bullet = 10'd16;
+		parameter [9:0] X_Start = 10'd500;
+		parameter [9:0] Y_Start = 10'd240;
+	  parameter [9:0] X_Min = 10'd0;       // Leftmost point on the X axis
+	  parameter [9:0] X_Max = 10'd639;     // Rightmost point on the X axis
+	  parameter [9:0] Y_Min = 10'd0;       // Topmost point on the Y axis
+	  parameter [9:0] Y_Max = 10'd479;     // Bottommost point on the Y axis
+	  parameter [9:0] X_Step = 10'd1;      // Step size on the X axis
+	  parameter [9:0] Y_Step = 10'd1;      // Step size on the Y axis
+		parameter [9:0] Width = 10'd32;
+		parameter [9:0] Height = 10'd32;
+		parameter [9:0] Width_Bullet = 10'd16;
+		parameter [9:0] Height_Bullet = 10'd16;
 
 
     logic [9:0] X_Pos, X_Motion, Y_Pos, Y_Motion;
 		logic [9:0] X_Bullet_in, Y_Bullet_in, X_Bullet, Y_Bullet;
-    logic [9:0] X_Pos_in, X_Motion_in, Y_Pos_in, Y_Motion_in, X_Bullet_Mot_In, X_Bullet_Mot, Y_Bullet_Mot_In, Y_Bullet_Mot;
-	 logic [2:0] tank_dir_in;
+    logic [9:0] X_Pos_in, X_Motion_in, Y_Pos_in, Y_Motion_in;
+		logic [9:0] X_Bullet_Mot_In, X_Bullet_Mot, Y_Bullet_Mot_In, Y_Bullet_Mot;
+	 	logic [2:0] tank_dir_in;
 
 	 initial begin
 		X_Pos_in = X_Start;
@@ -69,7 +71,8 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 						Y_Bullet <= 10'd0;
 						X_Bullet_Mot = 10'd0;
 						Y_Bullet_Mot = 10'd0;
-				tank_dir <= 3'd1;
+						is_shooting = 1'b0;
+						tank_dir <= 3'd1;
         end
         else
         begin
@@ -82,6 +85,9 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 						X_Bullet_Mot <= X_Bullet_Mot_In;
 						Y_Bullet_Mot <= Y_Bullet_Mot_In;
 						tank_dir <= tank_dir_in;
+						if (hit == 1'b1) begin
+
+						end
         end
     end
 
@@ -109,29 +115,37 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 					Y_Motion_in = (~(Y_Step) + 1'b1);
 					X_Motion_in = 1'b0;
 					tank_dir_in = 3'd1;
-					X_Bullet_in = X_Pos_in + 9'h10; //Bullet comes out of top center
-					Y_Bullet_in = Y_Pos_in; //Bullet comes out of top center
+					if (hit == 1'b1) begin//If it has hit a wall
+						X_Bullet_in = X_Pos_in + 9'h10; //Bullet comes out of top center
+						Y_Bullet_in = Y_Pos_in; //Bullet comes out of top center
+					end
 				end
 				else if( keycode == 8'h16 )	begin // 'S'
 					Y_Motion_in = Y_Step;
 					X_Motion_in = 1'b0;
 					tank_dir_in = 3'd4;
-					X_Bullet_in = X_Pos_in + 9'h10; //Bullet comes out of bottom center
-					Y_Bullet_in = Y_Pos_in + 9'h20; //Bullet comes out of bottom center
+					if (hit == 1'b1) begin //If it has hit a wall
+						X_Bullet_in = X_Pos_in + 9'h10; //Bullet comes out of bottom center
+						Y_Bullet_in = Y_Pos_in + 9'h20; //Bullet comes out of bottom center
+					end
 				end
 				else if( keycode == 8'h04 )	begin // 'A'
 					X_Motion_in = (~(X_Step) + 1'b1);
 					Y_Motion_in = 1'b0;
 					tank_dir_in = 3'd3;
-					X_Bullet_in = X_Pos_in; //Bullet comes out of left center
-					Y_Bullet_in = Y_Pos_in + 9'h10; //Bullet comes out of left center
+					if (hit == 1'b1) begin //If it has hit a wall
+						X_Bullet_in = X_Pos_in; //Bullet comes out of left center
+						Y_Bullet_in = Y_Pos_in + 9'h10; //Bullet comes out of left center
+					end
 				end
 				else if( keycode == 8'h07 )	begin // 'D'
 					X_Motion_in = X_Step;
 					Y_Motion_in = 1'b0;
 					tank_dir_in = 3'd2;
-					X_Bullet_in = X_Pos_in + 9'h20; //Bullet comes out of right center
-					Y_Bullet_in = Y_Pos_in + 9'h10; //Bullet comes out of right center
+					if (hit == 1'b1) begin //If it has hit a wall
+						X_Bullet_in = X_Pos_in + 9'h20; //Bullet comes out of right center
+						Y_Bullet_in = Y_Pos_in + 9'h10; //Bullet comes out of right center
+					end
 				end
 				else begin
 					X_Motion_in = 1'b0;
@@ -182,8 +196,7 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 				Y_Pos_in = Y_Pos + Y_Motion;
 				X_Bullet_in = X_Bullet + X_Bullet_Mot;	//Bullet will come out of appropriate direction
 				Y_Bullet_in = Y_Bullet + Y_Bullet_Mot; //Bullet will come out of appropriate direction
-
-        end
+    end
 
 end
 
