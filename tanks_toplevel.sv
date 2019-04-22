@@ -150,7 +150,7 @@ module tanks_toplevel( input               CLOCK_50,
 					 );
 
 	 tank_ai tank_p2(.Clk(Clk), .Reset(Reset_h),
-//						  .frame_clk(VGA_VS),
+						  .frame_clk(VGA_VS),
 						  .DrawX(DrawX), .DrawY(DrawY),
 						  .is_tank(is_tank2),
 						  .tank_dir(tank_dir2),
@@ -169,7 +169,7 @@ module tanks_toplevel( input               CLOCK_50,
 											.VGA_R(VGA_R), .VGA_G(VGA_G), .VGA_B(VGA_B));
 
     // Display keycode on hex display
-    HexDriver hex_inst_0 (tank_dir2, HEX0);
+    HexDriver hex_inst_0 (count[3:0], HEX0);
     HexDriver hex_inst_1 (count[7:4], HEX1);
 
 endmodule

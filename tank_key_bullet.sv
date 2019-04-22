@@ -6,7 +6,7 @@ module  tank_key (	input         Clk,                // 50 MHz clock
 										output logic [2:0] tank_dir,
 										output logic  is_shooting,	 		//Whether enter is pressed and tank is shooting
 										output logic is_bullet,
-										output logic hit,
+										output logic [1:0] hit1,
 										output logic [9:0] tank_X, tank_Y,
 										input logic [7:0] keycode			 // key that is being pressed
 					  );
@@ -21,8 +21,8 @@ module  tank_key (	input         Clk,                // 50 MHz clock
 	  parameter [9:0] Y_Step = 10'd1;      // Step size on the Y axis
 		parameter [9:0] Width = 10'd32;
 		parameter [9:0] Height = 10'd32;
-		parameter [9:0] Width_Bullet = 10'd16;
-		parameter [9:0] Height_Bullet = 10'd16;
+		parameter [9:0] Bullet_Width = 10'd16;
+		parameter [9:0] Bullet_Height = 10'd16;
 
 
     logic [9:0] X_Pos, X_Motion, Y_Pos, Y_Motion;
@@ -50,6 +50,7 @@ module  tank_key (	input         Clk,                // 50 MHz clock
 		Y_Bullet_Mot = 10'd0;
 		tank_dir = 3'd1;
 		tank_dir_in = 3'd1;
+		hit1 = 2'b00;	//00 = no bullet on screen, 01 = bullet on screen, 10 = bullet hit wall
 	 end
 
     // Detect rising edge of frame_clk
@@ -73,6 +74,7 @@ module  tank_key (	input         Clk,                // 50 MHz clock
 						Y_Bullet_Mot = 10'd0;
 						is_shooting = 1'b0;
 						tank_dir <= 3'd1;
+						hit1 = 2'b00;	//No bullet on screen
         end
         else
         begin
@@ -85,9 +87,6 @@ module  tank_key (	input         Clk,                // 50 MHz clock
 						X_Bullet_Mot <= X_Bullet_Mot_In;
 						Y_Bullet_Mot <= Y_Bullet_Mot_In;
 						tank_dir <= tank_dir_in;
-						if (hit == 1'b1) begin
-
-						end
         end
     end
 
@@ -115,7 +114,7 @@ module  tank_key (	input         Clk,                // 50 MHz clock
 					Y_Motion_in = (~(Y_Step) + 1'b1);
 					X_Motion_in = 1'b0;
 					tank_dir_in = 3'd1;
-					if (hit == 1'b1) begin//If it has hit a wall
+					if (hit1 != 2'b01) begin //If there is no bullet or it has hit a wall
 						X_Bullet_in = X_Pos_in + 9'h10; //Bullet comes out of top center
 						Y_Bullet_in = Y_Pos_in; //Bullet comes out of top center
 					end
@@ -124,7 +123,7 @@ module  tank_key (	input         Clk,                // 50 MHz clock
 					Y_Motion_in = Y_Step;
 					X_Motion_in = 1'b0;
 					tank_dir_in = 3'd4;
-					if (hit == 1'b1) begin //If it has hit a wall
+					if (hit1 != 2'b01) begin //If there is no bullet or it has hit a wall
 						X_Bullet_in = X_Pos_in + 9'h10; //Bullet comes out of bottom center
 						Y_Bullet_in = Y_Pos_in + 9'h20; //Bullet comes out of bottom center
 					end
@@ -133,7 +132,7 @@ module  tank_key (	input         Clk,                // 50 MHz clock
 					X_Motion_in = (~(X_Step) + 1'b1);
 					Y_Motion_in = 1'b0;
 					tank_dir_in = 3'd3;
-					if (hit == 1'b1) begin //If it has hit a wall
+					if (hit1 != 2'b01) begin //If there is no bullet or it has hit a wall
 						X_Bullet_in = X_Pos_in; //Bullet comes out of left center
 						Y_Bullet_in = Y_Pos_in + 9'h10; //Bullet comes out of left center
 					end
@@ -142,7 +141,7 @@ module  tank_key (	input         Clk,                // 50 MHz clock
 					X_Motion_in = X_Step;
 					Y_Motion_in = 1'b0;
 					tank_dir_in = 3'd2;
-					if (hit == 1'b1) begin //If it has hit a wall
+					if (hit1 != 2'b01) begin //If there is no bullet or it has hit a wall
 						X_Bullet_in = X_Pos_in + 9'h20; //Bullet comes out of right center
 						Y_Bullet_in = Y_Pos_in + 9'h10; //Bullet comes out of right center
 					end
@@ -153,7 +152,7 @@ module  tank_key (	input         Clk,                // 50 MHz clock
 					is_shooting = 1'b0;
 				end
 
-				if( keycode == 8'h58 ) begin // 'Enter'
+				if( keycode == 8'h58) begin // 'Enter'
 				  X_Motion_in = X_Motion; //Keeps track of previous x motion, so tank can keep moving in that direction
 				  Y_Motion_in = Y_Motion; //Keeps track of previous y motion, so tank can keep moving in that direction
 				  is_shooting = 1'b1;
@@ -190,6 +189,23 @@ module  tank_key (	input         Clk,                // 50 MHz clock
             else if ( X_Pos <= X_Min ) begin // Ball is at the left edge, BOUNCE!
                 X_Motion_in = X_Step;
 					 Y_Motion_in = 1'b0;
+				end
+
+				if( Y_Bullet + Bullet_Height >= Y_Max ) begin // Ball is at the bottom edge, BOUNCE!
+					hit1 = 2'b10;
+				end
+				else if ( Y_Bullet <= Y_Min ) begin  // Ball is at the top edge, BOUNCE!
+					hit1 = 2'b10;
+				end
+				if( X_Bullet + Bullet_Width >= X_Max ) begin // Ball is at the right edge, BOUNCE!
+					hit1 = 2'b10;
+				end
+				else if ( X_Bullet <= X_Min ) begin // Ball is at the left edge, BOUNCE!
+					hit1 = 2'b10;
+				else if (hit1 == 2'b01)
+					hit1 = 2'b01;	//The bullet is still in the air
+				else if (hit1 == 2'b00)
+					hit1 = 2'b00; //There is no bullet
 				end
 
 				X_Pos_in = X_Pos + X_Motion;

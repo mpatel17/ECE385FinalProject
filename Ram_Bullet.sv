@@ -6,26 +6,32 @@
 
 module  frameRAM_Bullet
 (
-		input [4:0] data_In,
-		input [18:0] write_address, read_address,
-		input we, Clk,
+		input [18:0] read_address,
+		input Clk,
 
-		output logic [4:0] data_Out
+		output logic [23:0] data_Out
 );
 
+
+logic [23:0] palette [2:0];
+logic [1:0] index;
+
 // mem has width of 3 bits and a total of 175 addresses
-logic [2:0] mem [0:174];
+logic [1:0] mem [0:256];
+
+assign palette[0] = 24'hFFFFFF;
+assign palette[1] = 24'hFFC90E;
+assign palette[2] = 24'h000000;
 
 initial
 begin
-	 $readmemh("sprite_bytes/Bullet_1.txt", mem);
+	 $readmemh("sprite_bytes/Bullet.txt", mem);
 end
 
+assign index = mem[read_address];
 
 always_ff @ (posedge Clk) begin
-	if (we)
-		mem[write_address] <= data_In;
-	data_Out<= mem[read_address];
+	data_Out<= palette[index];
 end
 
 endmodule

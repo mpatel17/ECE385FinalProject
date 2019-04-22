@@ -1,12 +1,12 @@
 module tank_ai ( input         Clk,                // 50 MHz clock
 										  Reset,              // Active-high reset signal
-//										  frame_clk,          // The clock indicating a new frame (~60Hz)
+										  frame_clk,          // The clock indicating a new frame (~60Hz)
 						input [9:0]   DrawX, DrawY,       // Current pixel coordinates
 						output logic  is_tank,       		// Whether current pixel belongs to tank or background
 						output logic [2:0] tank_dir,
 						output logic  is_shooting,	 		//Whether enter is pressed and tank is shooting
 						output logic [9:0] tank_X, tank_Y,
-						output logic [7:0] count,
+						output logic [10:0] count,
 						output logic Clk_2
 						);
 
@@ -26,7 +26,7 @@ module tank_ai ( input         Clk,                // 50 MHz clock
 	logic [2:0] tank_dir_in;
 	logic [7:0] next_count; // count;
 //	logic Clk_2;
-	logic frame_clk;
+//	logic frame_clk;
 	logic [24:0] counter;
 	logic [2:0] ran_count;
 	
@@ -49,7 +49,7 @@ module tank_ai ( input         Clk,                // 50 MHz clock
 		Clk_2 = 1'b0;
 		tank_dir = 3'd1;
 		tank_dir_in = 3'd1;
-		count = 8'h00;
+		count = 10'd0;
 	 end
 	 
 	 // Detect rising edge of frame_clk
@@ -59,20 +59,20 @@ module tank_ai ( input         Clk,                // 50 MHz clock
         frame_clk_rising_edge <= (frame_clk == 1'b1) && (frame_clk_delayed == 1'b0);
     end
 	 
-	 always_ff @ (posedge Clk)
-	 begin
-		if(Reset) begin
-			counter <= 25'b0;
-			frame_clk <= 1'b0;
-		end
-		
-		else if(counter == 25'd12999999) begin
-			counter <= 25'b0;
-			frame_clk <= ~ frame_clk;
-		end else begin
-			counter <= counter + 1;
-		end
-	 end
+//	 always_ff @ (posedge Clk)
+//	 begin
+//		if(Reset) begin
+//			counter <= 25'b0;
+//			frame_clk <= 1'b0;
+//		end
+//		
+//		else if(counter == 25'd12999999) begin
+//			counter <= 25'b0;
+//			frame_clk <= ~ frame_clk;
+//		end else begin
+//			counter <= counter + 1;
+//		end
+//	 end
 	 
 	 
 	 
@@ -82,7 +82,7 @@ module tank_ai ( input         Clk,                // 50 MHz clock
 //			State <= UP;
 			X_Pos <= X_Start;
 			Y_Pos <= Y_Start;
-			count <= 8'h00;
+			count <= 10'd0;
 			tank_dir <= 3'd1;
 			X_Motion <= 10'd0;
 			Y_Motion <= 10'd0;
@@ -111,8 +111,8 @@ module tank_ai ( input         Clk,                // 50 MHz clock
         begin  
 				next_count = count + 1'b1;
 			  // check current motion and whether key is pressed to determine what to set X/Y_Motion to
-//			   if (count > 10'd200 ) begin
-//				next_count = 8'h00;
+			   if (count > 10'd100 ) begin
+				next_count = 8'h00;
 				
 					unique case(ran_count) 
 						3'd1: 
@@ -146,7 +146,7 @@ module tank_ai ( input         Clk,                // 50 MHz clock
 							tank_dir_in = tank_dir;
 						end
 					endcase
-//				end
+				end
 			
 				
 //				else begin
@@ -156,30 +156,30 @@ module tank_ai ( input         Clk,                // 50 MHz clock
 //				end				
 
 				if( Y_Pos + Height >= Y_Max && Y_Motion_in == Y_Step) begin // Ball is at the bottom edge, BOUNCE!
-					 Y_Motion_in = (~(Y_Step) + 1'b1); // 2's complement.
+					 Y_Motion_in = 1'b0;//(~(Y_Step) + 1'b1); // 2's complement.
 					 X_Motion_in = 1'b0; 
-					 tank_dir_in = 3'd1;
+//					 tank_dir_in = 3'd1;
 					 Y_Pos_in = Y_Max - Height;
 					 X_Pos_in = X_Pos + X_Motion;
 				end
 				else if ( Y_Pos <= Y_Min && Y_Motion_in > Y_Step) begin  // Ball is at the top edge, BOUNCE!
-					 Y_Motion_in = Y_Step;
+					 Y_Motion_in = 1'b0;//Y_Step;
 					 X_Motion_in = 1'b0;
-					 tank_dir_in = 3'd4;
+//					 tank_dir_in = 3'd4;
 					 Y_Pos_in = Y_Min;
 					 X_Pos_in = X_Pos + X_Motion;
 				end
 				if( X_Pos + Width >= X_Max && X_Motion_in == X_Step) begin // Ball is at the right edge, BOUNCE!
-					 X_Motion_in = (~(X_Step) + 1'b1);  // 2's complement.
+					 X_Motion_in = 1'b0;//(~(X_Step) + 1'b1);  // 2's complement.
 					 Y_Motion_in = 1'b0;
-					 tank_dir_in = 3'd3;
+//					 tank_dir_in = 3'd3;
 					 X_Pos_in = X_Max - Width;
 					 Y_Pos_in = Y_Pos + Y_Motion;
 				end
 				else if ( X_Pos <= X_Min && X_Motion_in > X_Step) begin // Ball is at the left edge, BOUNCE!
-					 X_Motion_in = X_Step;     
+					 X_Motion_in = 1'b0;//X_Step;     
 					 Y_Motion_in = 1'b0;
-					 tank_dir_in = 3'd2;
+//					 tank_dir_in = 3'd2;
 					 X_Pos_in = X_Min;
 					 Y_Pos_in = Y_Pos + Y_Motion;
 				end
