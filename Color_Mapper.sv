@@ -31,11 +31,13 @@ module  color_mapper ( //input              is_ball,            // Whether curre
     logic [7:0] Red, Green, Blue;
 	 logic [18:0] tank_addr, back_addr;
 	 logic [23:0] RGB_tanku, RGB_tankr, RGB_tankl, RGB_tankd, RGB_back;
+	 logic mode;
 
     // Output colors to VGA
     assign VGA_R = Red;
     assign VGA_G = Green;
     assign VGA_B = Blue;
+	 assign mode = 1'b0;
 
 	 frameRAM_Tank_1 tank_u(.read_address(tank_addr), .Clk(Clk),
 								  .data_Out(RGB_tanku)
@@ -96,7 +98,7 @@ module  color_mapper ( //input              is_ball,            // Whether curre
 			endcase
 		end
 
-		else if (is_tank2 == 1'b1 && mode == 1'b0) begin
+		else if (is_tank2 == 1'b1 ) begin //&& mode == 1'b0) begin
 			tank_addr = (DrawX - tankX2) + ((DrawY - tankY2) << 3'd5);
 
 			case(tank_dir2)
@@ -127,43 +129,45 @@ module  color_mapper ( //input              is_ball,            // Whether curre
 					Green = RGB_tankd & 24'h00FF00 >> 4'd8;
 					Blue = RGB_tankd & 24'h0000FF;
 				end
-				default: ;
-			endcase
-
-			else if (is_tank3 == 1'b1 && mode == 1'b1) begin
-				tank_addr = (DrawX - tankX3) + ((DrawY - tankY3) << 3'd5);
-
-				case(tank_dir3)
-				3'b001:
-					if (RGB_tanku != 24'hFF0000) begin
-						Red = RGB_tanku & 24'hFF0000 >> 5'd16;
-						Green = RGB_tanku & 24'h00FF00 >> 4'd8;
-						Blue = RGB_tanku & 24'h0000FF;
-					end
-
-				3'b010:
-					if (RGB_tankr != 24'hFF0000) begin
-						Red = RGB_tankr & 24'hFF0000 >> 5'd16;
-						Green = RGB_tankr & 24'h00FF00 >> 4'd8;
-						Blue = RGB_tankr & 24'h0000FF;
-					end
-
-				3'b011:
-					if (RGB_tankl != 24'hFF0000) begin
-						Red = RGB_tankl & 24'hFF0000 >> 5'd16;
-						Green = RGB_tankl & 24'h00FF00 >> 4'd8;
-						Blue = RGB_tankl & 24'h0000FF;
-					end
-
-				3'b100:
-					if (RGB_tankd != 24'hFF0000) begin
-						Red = RGB_tankd & 24'hFF0000 >> 5'd16;
-						Green = RGB_tankd & 24'h00FF00 >> 4'd8;
-						Blue = RGB_tankd & 24'h0000FF;
-					end
+				
 			default: ;
 			endcase
 		end
+
+//		else if (is_tank3 == 1'b1 && mode == 1'b1) begin
+//			tank_addr = (DrawX - tankX3) + ((DrawY - tankY3) << 3'd5);
+//
+//			case(tank_dir3)
+//			3'b001:
+//				if (RGB_tanku != 24'hFF0000) begin
+//					Red = RGB_tanku & 24'hFF0000 >> 5'd16;
+//					Green = RGB_tanku & 24'h00FF00 >> 4'd8;
+//					Blue = RGB_tanku & 24'h0000FF;
+//				end
+//
+//			3'b010:
+//				if (RGB_tankr != 24'hFF0000) begin
+//					Red = RGB_tankr & 24'hFF0000 >> 5'd16;
+//					Green = RGB_tankr & 24'h00FF00 >> 4'd8;
+//					Blue = RGB_tankr & 24'h0000FF;
+//				end
+//
+//			3'b011:
+//				if (RGB_tankl != 24'hFF0000) begin
+//					Red = RGB_tankl & 24'hFF0000 >> 5'd16;
+//					Green = RGB_tankl & 24'h00FF00 >> 4'd8;
+//					Blue = RGB_tankl & 24'h0000FF;
+//				end
+//
+//			3'b100:
+//				if (RGB_tankd != 24'hFF0000) begin
+//					Red = RGB_tankd & 24'hFF0000 >> 5'd16;
+//					Green = RGB_tankd & 24'h00FF00 >> 4'd8;
+//					Blue = RGB_tankd & 24'h0000FF;
+//				end
+//			default: ;
+//			endcase
+//		end
 
 	end
 
