@@ -14,14 +14,12 @@
 //-------------------------------------------------------------------------
 
 // color_mapper: Decide which color to be output to VGA for each pixel.
-module  color_mapper ( //input              is_ball,            // Whether current pixel belongs to ball
-                                                              //   or background (computed in ball.sv)
-							  input				   is_tank1, is_tank2, is_shooting1, is_shooting2, is_bullet
-							  input			[2:0] tank_dir1, tank_dir2,
-                       input        [9:0] DrawX, DrawY,       // Current pixel coordinates
-							  input			[9:0] tankX1, tankX2, tankY1, tankY2,
-							  input					Clk,
-                       output logic [7:0] VGA_R, VGA_G, VGA_B // VGA RGB output
+module  color_mapper (  input			is_tank1, is_tank2, is_shooting1, is_shooting2, hit1,
+											  input			[2:0] tank_dir1, tank_dir2,
+				                input     [9:0] DrawX, DrawY,       // Current pixel coordinates
+											  input			[9:0] tankX1, tankX2, tankY1, tankY2, bullet_X1, bullet_Y1,
+											  input			Clk,
+                       	output logic [7:0] VGA_R, VGA_G, VGA_B // VGA RGB output
                      );
 
 	 parameter [9:0] TankWidth = 10'd32;
@@ -52,6 +50,8 @@ module  color_mapper ( //input              is_ball,            // Whether curre
 //	 frameRAM_Background back(.read_address(back_addr), .Clk(Clk),
 //									  .data_Out(RGB_back)
 //									  );
+		frameRAM_Bullet bullet(.read_address(bullet_addr), .Clk(Clk),
+ 									.data_Out(RGB_bullet)
 
     always_comb
     begin
@@ -129,7 +129,6 @@ module  color_mapper ( //input              is_ball,            // Whether curre
 				end
 				default: ;
 			endcase
-		end
 
 			else if (is_tank3 == 1'b1 && mode == 1'b1) begin
 				tank_addr = (DrawX - tankX3) + ((DrawY - tankY3) << 3'd5);
@@ -165,25 +164,13 @@ module  color_mapper ( //input              is_ball,            // Whether curre
 			default: ;
 			endcase
 		end
-
-		//Do we need 2 separate cases for is_shooting1 and is_shooting2?
-		if (is_bullet && is_shooting1) begin
-			bullet_addr = (DrawX - bullet_X) + ((DrawY - bullet_Y) << 3'd5);
+		else if (is_bullet) begin
+			bullet_addr = (DrawX - bullet_X1) + ((DrawY - bullet_Y1) << 3'd5);
 			if (RGB_bullet != 24'hFF0000) begin
 				Red = RGB_bullet & 24'hFF0000 >> 5'd16;
 				Green = RGB_bullet & 24'h00FF00 >> 4'd8;
 				Blue = RGB_bullet & 24'h0000FF;
 			end
-		end
-
-		else if(is_bullet && is_shooting2) begin
-			bullet_addr = (DrawX - bullet_X) + ((DrawY - bullet_Y) << 3'd5);
-			if (RGB_bullet != 24'hFF0000) begin
-				Red = RGB_bullet & 24'hFF0000 >> 5'd16;
-				Green = RGB_bullet & 24'h00FF00 >> 4'd8;
-				Blue = RGB_bullet & 24'h0000FF;
-			end
-		end
 	end
 
 endmodule
