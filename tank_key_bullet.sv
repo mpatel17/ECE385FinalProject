@@ -70,11 +70,11 @@ module  tank_key (	input         Clk,                // 50 MHz clock
             Y_Motion <= 10'd0;
 						X_Bullet <= 10'd0;
 						Y_Bullet <= 10'd0;
-						X_Bullet_Mot = 10'd0;
-						Y_Bullet_Mot = 10'd0;
-						is_shooting = 1'b0;
+						X_Bullet_Mot <= 10'd0;
+						Y_Bullet_Mot <= 10'd0;
+						is_shooting <= 1'b0;
 						tank_dir <= 3'd1;
-						hit1 = 2'b00;	//No bullet on screen
+						hit1 <= 2'b00;	//No bullet on screen
         end
         else
         begin
@@ -102,6 +102,7 @@ module  tank_key (	input         Clk,                // 50 MHz clock
 				X_Bullet_Mot_In = X_Bullet_Mot;
 				Y_Bullet_Mot_In = Y_Bullet_Mot;
 		  	is_shooting = 1'b0;
+				hit1 = 2'b00;	//No bullet
 		  	tank_dir_in = tank_dir;
 
         // Update position and motion only at rising edge of frame clock
