@@ -111,8 +111,8 @@ module tank_ai ( input         Clk,                // 50 MHz clock
         begin  
 				next_count = count + 1'b1;
 			  // check current motion and whether key is pressed to determine what to set X/Y_Motion to
-			   if (count > 10'd100 ) begin
-				next_count = 8'h00;
+			   if (count > 10'd200) begin //((ran_count + 1'b1) << 3'd6) ) begin
+				next_count = 10'd0;
 				
 					unique case(ran_count) 
 						3'd1: 
