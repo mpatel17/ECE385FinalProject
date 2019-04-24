@@ -133,7 +133,7 @@ module  color_mapper ( input				   is_tank1, is_tank2, is_bullet, is_shooting1, 
 			endcase
 		end
 		
-		else if (is_bullet) begin
+		else if (is_bullet == 1'b1 && hit1 == 2'b01) begin
 			bullet_addr = (DrawX - bulletX1) + ((DrawY - bulletY1) << 3'd4);
 			if (RGB_bullet != 24'hFFFFFF) begin
 				Red = RGB_bullet[23:16];

@@ -162,7 +162,7 @@ module tanks_toplevel( input               CLOCK_50,
 						  .Clk_2(Clk_2)
 						  );
 
-    color_mapper color_instance(	.is_tank1(is_tank1), .is_tank2(is_tank2),
+    color_mapper color_instance(	.is_tank1(is_tank1), .is_tank2(is_tank2), .is_bullet(is_bullet1),
 											.is_shooting1(is_shooting1), //.is_shooting2(is_shooting2),
 											.hit1(hit1),
 											.tank_dir1(tank_dir1), .tank_dir2(tank_dir2),
