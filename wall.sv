@@ -27,32 +27,30 @@ module  wall (	input 	Clk,                // 50 MHz clock
  			counter = 0;
  	 	end
 
-		case(num_walls)
-			1'b0: begin//One wall per direction
-				X1 = (counter << (num_walls + 1)) % 10'd639;
-				Y1 = (counter << (num_walls + 1)) % 10'd479;
-				while (X1 != X2)
-					X2 = (counter << (num_walls + 1)) % 10'd639;
-				while (Y1 != Y2)
-					Y2 = (counter << (num_walls + 1)) % 10'd479;
+				// X1 = (counter << (num_walls + 1)) % 10'd639;
+				// Y1 = (counter << (num_walls + 1)) % 10'd479;
+				// while (X1 != X2)
+				// 	X2 = (counter << (num_walls + 1)) % 10'd639;
+				// while (Y1 != Y2)
+				// 	Y2 = (counter << (num_walls + 1)) % 10'd479;
+				// while (X1 != X3 && X2 != X3)
+				// 	X3 = (counter << (num_walls + 1)) % 10'd639;
+				// while (Y1 != Y3 && Y2 != Y3)
+				// 	Y3 = (counter << (num_walls + 1)) % 10'd479;
+				// while (X1 != X4 && X2 != X4 && X3 != X4)
+				// 	X4 = (counter << (num_walls + 1)) % 10'd639;
+				// while (Y1 != Y3 && Y2 != Y3 && Y3 != Y4)
+				// 	Y4 = (counter << (num_walls + 1)) % 10'd479;
 
-			1'b1: //Two walls per direction
-				X1 = (counter << (num_walls + 1)) % 10'd639;
-				Y1 = (counter << (num_walls + 1)) % 10'd479;
-				while (X1 != X2)
-					X2 = (counter << (num_walls + 1)) % 10'd639;
-				while (Y1 != Y2)
-					Y2 = (counter << (num_walls + 1)) % 10'd479;
-				while (X1 != X3 && X2 != X3)
-					X3 = (counter << (num_walls + 1)) % 10'd639;
-				while (Y1 != Y3 && Y2 != Y3)
-					Y3 = (counter << (num_walls + 1)) % 10'd479;
-				while (X1 != X4 && X2 != X4 && X3 != X4)
-					X4 = (counter << (num_walls + 1)) % 10'd639;
-				while (Y1 != Y3 && Y2 != Y3 && Y3 != Y4)
-					Y4 = (counter << (num_walls + 1)) % 10'd479;
-			end
-
+				assign X1 = 10'd10;
+				assign Y1 = 10'd20;
+				assign X2 = 10'd400;
+				assign Y2 = 10'd200;
+				assign X3 = 10'd320;
+				assign Y3 = 10'd240;
+				assign X4 = 10'd600;
+				assign Y4 = 10'd400;
+				
 			//Distance for each wall and horizontal and vertical dimensions
 			int DistX1, DistX2, DistX3, DistX4, DistY1, DistY2, DistY3, DistY4, Wh, Hh, Wv, Hv;
 	    assign DistX1 = DrawX - X1;
