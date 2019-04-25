@@ -14,11 +14,13 @@
 //-------------------------------------------------------------------------
 
 // color_mapper: Decide which color to be output to VGA for each pixel.
-module  color_mapper ( input				   is_tank1, is_tank2, is_bullet, is_shooting1, //is_shooting2,
-							  input			[1:0] hit1,
+module  color_mapper ( input				   is_tank1, is_tank2, is_bullet1, is_bullet2,// is_shooting1, is_shooting2,
+							  input					is_wall1, is_wall2, is_wall3, is_wall4,
+							  input			[1:0] hit1, hit2,
 							  input			[2:0] tank_dir1, tank_dir2,
                        input        [9:0] DrawX, DrawY,       // Current pixel coordinates
-							  input			[9:0] tankX1, tankX2, tankY1, tankY2, bulletX1, bulletY1,
+							  input			[9:0] tankX1, tankX2, tankY1, tankY2, bulletX1, bulletY1, bulletX2, bulletY2,
+							  input			[9:0] wallX1, wallX2, wallX3, wallX4, wallY1, wallY2, wallY3, wallY4,
 							  input					Clk,
                        output logic [7:0] VGA_R, VGA_G, VGA_B // VGA RGB output
                      );
@@ -27,8 +29,8 @@ module  color_mapper ( input				   is_tank1, is_tank2, is_bullet, is_shooting1, 
 	 parameter [9:0] TankHeight = 10'd32;
 
     logic [7:0] Red, Green, Blue;
-	 logic [18:0] tank_addr, bullet_addr;
-	 logic [23:0] RGB_tanku, RGB_tankr, RGB_tankl, RGB_tankd, RGB_bullet;
+	 logic [18:0] tank_addr, bullet_addr, wall_addr_v, wall_addr_h;
+	 logic [23:0] RGB_tanku, RGB_tankr, RGB_tankl, RGB_tankd, RGB_bullet, RGB_wall_v, RGB_wall_h;
 	 logic mode;
 
     // Output colors to VGA
@@ -52,6 +54,13 @@ module  color_mapper ( input				   is_tank1, is_tank2, is_bullet, is_shooting1, 
 	 frameRAM_Bullet bullet(.read_address(bullet_addr), .Clk(Clk),
  									.data_Out(RGB_bullet)
 									);
+	 frameRAM_Wall_H horizon (.read_address(wall_addr_h), .Clk(Clk),
+ 									.data_Out(RGB_wall_h)
+									);
+
+	 frameRAM_Wall_V verizon (.read_address(wall_addr_v), .Clk(Clk),
+ 									.data_Out(RGB_wall_v)
+									);
 
     always_comb
     begin
@@ -61,6 +70,8 @@ module  color_mapper ( input				   is_tank1, is_tank2, is_bullet, is_shooting1, 
 			Blue = 24'hFFFFFF;
 			tank_addr = 18'd0;
 			bullet_addr = 18'd0;
+			wall_addr_h = 18'd0;
+			wall_addr_v = 18'd0;
 
 		if (is_tank1 == 1'b1) begin
 			tank_addr = (DrawX - tankX1) + ((DrawY - tankY1) << 3'd5);
@@ -133,12 +144,45 @@ module  color_mapper ( input				   is_tank1, is_tank2, is_bullet, is_shooting1, 
 			endcase
 		end
 		
-		else if (is_bullet == 1'b1 && hit1 == 2'b01) begin
-			bullet_addr = (DrawX - bulletX1) + ((DrawY - bulletY1) << 3'd4);
+		else if (is_bullet1 == 1'b1 && hit1 == 2'b01) begin
+			bullet_addr = (DrawX - bulletX1) + ((DrawY - bulletY1) << 2'd3);
 			if (RGB_bullet != 24'hFFFFFF) begin
 				Red = RGB_bullet[23:16];
 				Green = RGB_bullet[15:8];
 				Blue = RGB_bullet[7:0];
+			end
+		end
+		
+		else if (is_bullet2 == 1'b1 && hit2 == 2'b01) begin
+			bullet_addr = (DrawX - bulletX2) + ((DrawY - bulletY2) << 2'd3);
+			if (RGB_bullet != 24'hFFFFFF) begin
+				Red = RGB_bullet[23:16];
+				Green = RGB_bullet[15:8];
+				Blue = RGB_bullet[7:0];
+			end
+		end
+		
+		else if (is_wall1 || is_wall3) begin
+			if(is_wall1)
+				wall_addr_h = (DrawX - wallX1) + ((DrawY - wallY1) << 3'd6);
+			else
+				wall_addr_h = (DrawX - wallX3) + ((DrawY - wallY3) << 3'd6);
+			if (RGB_wall_h != 24'hFF0000) begin
+				Red = RGB_wall_h[23:16];
+				Green = RGB_wall_h[15:8];
+				Blue = RGB_wall_h[7:0];
+			end
+		end
+		
+		else if (is_wall2 || is_wall4) begin
+			if(is_wall2)
+				wall_addr_v = (DrawX - wallX2) + ((DrawY - wallY2) << 3'd5);
+			else
+				wall_addr_v = (DrawX - wallX4) + ((DrawY - wallY4) << 3'd5);
+			if (RGB_wall_v != 24'hFF0000) begin
+				Red = RGB_wall_v[23:16];
+				Green = RGB_wall_v[15:8];
+				Blue = RGB_wall_v[7:0];
 			end
 		end
 		

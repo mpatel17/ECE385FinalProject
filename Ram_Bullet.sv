@@ -17,7 +17,7 @@ logic [23:0] palette [2:0];
 logic [1:0] index;
 
 // mem has width of 3 bits and a total of 175 addresses
-logic [1:0] mem [0:256];
+logic [1:0] mem [0:63];
 
 assign palette[0] = 24'hFFFFFF;
 assign palette[1] = 24'hFFC90E;

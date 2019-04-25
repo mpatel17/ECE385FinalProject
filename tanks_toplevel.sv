@@ -15,7 +15,7 @@
 
 module tanks_toplevel( input               CLOCK_50,
              input        [3:0]  KEY,          //bit 0 is set up as Reset
-             output logic [6:0]  HEX0, HEX1,
+             output logic [6:0]  HEX0, HEX1, HEX2, HEX3,
              // VGA Interface
              output logic [7:0]  VGA_R,        //VGA Red
                                  VGA_G,        //VGA Green
@@ -47,7 +47,10 @@ module tanks_toplevel( input               CLOCK_50,
                     );
 
     logic Reset_h, Clk;
-    logic [7:0] keycode;
+    logic [15:0] keycode;
+	 logic [15:0] keycode2;
+	 logic [7:0] keycode_p1;
+	 logic [7:0] keycode_p2;
 
     assign Clk = CLOCK_50;
     always_ff @ (posedge Clk) begin
@@ -58,15 +61,22 @@ module tanks_toplevel( input               CLOCK_50,
     logic [15:0] hpi_data_in, hpi_data_out;
     logic hpi_r, hpi_w, hpi_cs, hpi_reset;
 	 
-	 logic [9:0] DrawX, DrawY;
-	 logic [9:0] tank_X1, tank_X2, tank_Y1, tank_Y2, bullet_X1, bullet_Y1;
-	 logic is_tank1, is_tank2, is_bullet1, is_shooting1;
+	 logic [9:0] DrawX, DrawY; //startx1, starty1, startx2, starty2;
+	 logic [9:0] tank_X1, tank_X2, tank_Y1, tank_Y2, bullet_X1, bullet_Y1, bullet_X2, bullet_Y2;
+	 logic [9:0] wallX1, wallX2, wallX3, wallX4, wallY1, wallY2, wallY3, wallY4;
+	 logic is_tank1, is_tank2, is_bullet1, is_bullet2, is_shooting1, is_shooting2;
+	 logic is_wall1, is_wall2, is_wall3, is_wall4;
 	 logic frame_clk;
-	 logic [1:0] hit1;
+	 logic [1:0] hit1, hit2;
 	 logic [2:0] tank_dir1, tank_dir2;
 	 logic [7:0] count;
 	 logic Clk_2;
 
+	 parameter[9:0] startx1 = 10'd140;
+	 parameter[9:0] starty1 = 10'd240;
+	 parameter[9:0] startx2 = 10'd500;
+	 parameter[9:0] starty2 = 10'd240;
+	 
     // Interface between NIOS II and EZ-OTG chip
     hpi_io_intf hpi_io_inst(
                             .Clk(Clk),
@@ -102,6 +112,7 @@ module tanks_toplevel( input               CLOCK_50,
                              .sdram_wire_we_n(DRAM_WE_N),
                              .sdram_clk_clk(DRAM_CLK),
                              .keycode_export(keycode),
+									  .keycode2_export(keycode2),
                              .otg_hpi_address_external_connection_export(hpi_addr),
                              .otg_hpi_data_in_port(hpi_data_in),
                              .otg_hpi_data_out_port(hpi_data_out),
@@ -122,58 +133,69 @@ module tanks_toplevel( input               CLOCK_50,
 															.VGA_BLANK_N(VGA_BLANK_N), .VGA_SYNC_N(VGA_SYNC_N),
 															.DrawX(DrawX), .DrawY(DrawY));
 
-    // Which signal should be frame_clk?
-//    ball ball_instance(.Clk(Clk), .Reset(Reset_h),
-//								.frame_clk(VGA_VS),
-//								.DrawX(DrawX), .DrawY(DrawY),
-//								.is_ball(is_ball),
-//								.is_shooting(is_shooting),
-//								.keycode(keycode)
-//								);
+	 choose_keycode choose(.keycode(keycode),
+								  .keycode_p1(keycode_p1), .keycode_p2(keycode_p2)
+								  );
 
 	 tank_key tank_p1(.Clk(Clk), .Reset(Reset_h),
 						  .frame_clk(VGA_VS),
+						  .X_Start(startx1), .Y_Start(starty1),
 						  .DrawX(DrawX), .DrawY(DrawY),
 						  .is_tank(is_tank1), .is_bullet(is_bullet1),
 						  .tank_dir(tank_dir1),
 						  .is_shooting(is_shooting1), .hit(hit1),
 						  .tank_X(tank_X1), .tank_Y(tank_Y1),
 						  .bullet_X(bullet_X1), .bullet_Y(bullet_Y1),
-						  .keycode(keycode)
+						  .keycode(keycode_p1)
 						  );
 
-//	  tank_key tank_p3(.Clk(Clk), .Reset(Reset_h),
-//					 .frame_clk(VGA_VS),
-//					 .DrawX(DrawX), .DrawY(DrawY),
-//					 .is_tank(is_tank3),
-//					 .tank_dir(tank_dir3),
-//					 .is_shooting(is_shooting2),
-//					 .tank_X(tank_X3), .tank_Y(tank_Y3),
-//					 .keycode(keycode)
-//					 );
+	 tank_key tank_p3(.Clk(Clk), .Reset(Reset_h),
+							.frame_clk(VGA_VS),
+							.X_Start(startx2), .Y_Start(starty2),
+							.DrawX(DrawX), .DrawY(DrawY),
+							.is_tank(is_tank2), .is_bullet(is_bullet2),
+							.tank_dir(tank_dir2),
+							.is_shooting(is_shooting2), .hit(hit2),
+							.tank_X(tank_X2), .tank_Y(tank_Y2),
+							.bullet_X(bullet_X2), .bullet_Y(bullet_Y2),
+							.keycode(keycode_p2)
+							);
 
-	 tank_ai tank_p2(.Clk(Clk), .Reset(Reset_h),
-						  .frame_clk(VGA_VS),
-						  .DrawX(DrawX), .DrawY(DrawY),
-						  .is_tank(is_tank2),
-						  .tank_dir(tank_dir2),
-						  .tank_X(tank_X2), .tank_Y(tank_Y2),
-						  .count(count),
-						  .Clk_2(Clk_2)
-						  );
+//	 tank_ai tank_p2(.Clk(Clk), .Reset(Reset_h),
+//						  .frame_clk(VGA_VS),
+//						  .DrawX(DrawX), .DrawY(DrawY),
+//						  .is_tank(is_tank2),
+//						  .tank_dir(tank_dir2),
+//						  .tank_X(tank_X2), .tank_Y(tank_Y2),
+//						  .count(count),
+//						  .Clk_2(Clk_2)
+//						  );
+	
+	 wall walls(.Clk(Clk), .Reset(Reset_h),
+					.frame_clk(frame_clk),
+					.DrawX(DrawX), .DrawY(DrawY),
+					.is_wall1(is_wall1), .is_wall2(is_wall2), .is_wall3(is_wall3), .is_wall4(is_wall4),
+					.X1(wallX1), .X2(wallX2), .X3(wallX3), .X4(wallX4), 
+					.Y1(wallY1), .Y2(wallY2), .Y3(wallY3), .Y4(wallY4)
+					);
 
-    color_mapper color_instance(	.is_tank1(is_tank1), .is_tank2(is_tank2), .is_bullet(is_bullet1),
-											.is_shooting1(is_shooting1), //.is_shooting2(is_shooting2),
-											.hit1(hit1),
+    color_mapper color_instance(	.is_tank1(is_tank1), .is_tank2(is_tank2), .is_bullet1(is_bullet1), .is_bullet2(is_bullet2),
+											//.is_shooting1(is_shooting1), .is_shooting2(is_shooting2),
+											.is_wall1(is_wall1), .is_wall2(is_wall2), .is_wall3(is_wall3), .is_wall4(is_wall4),
+											.hit1(hit1), .hit2(hit2),
 											.tank_dir1(tank_dir1), .tank_dir2(tank_dir2),
 											.DrawX(DrawX), .DrawY(DrawY),
 											.tankX1(tank_X1), .tankX2(tank_X2), .tankY1(tank_Y1), .tankY2(tank_Y2),
-											.bulletX1(bullet_X1), .bulletY1(bullet_Y1),
+											.wallX1(wallX1), .wallX2(wallX2), .wallX3(wallX3), .wallX4(wallX4), 
+											.wallY1(wallY1), .wallY2(wallY2), .wallY3(wallY3), .wallY4(wallY4),
+											.bulletX1(bullet_X1), .bulletY1(bullet_Y1), .bulletX2(bullet_X2), .bulletY2(bullet_Y2),
 											.Clk(Clk),
 											.VGA_R(VGA_R), .VGA_G(VGA_G), .VGA_B(VGA_B));
 
     // Display keycode on hex display
-    HexDriver hex_inst_0 (count[3:0], HEX0);
-    HexDriver hex_inst_1 (count[7:4], HEX1);
+    HexDriver hex_inst_0 (keycode_p1[3:0], HEX0);
+    HexDriver hex_inst_1 (keycode_p1[7:4], HEX1);
+	 HexDriver hex_inst_2 (keycode_p2[3:0], HEX2);
+	 HexDriver hex_inst_3 (keycode_p2[7:4], HEX3);
 
 endmodule
