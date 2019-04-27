@@ -15,7 +15,7 @@
 
 module tanks_toplevel( input               CLOCK_50,
              input        [3:0]  KEY,          //bit 0 is set up as Reset
-             output logic [6:0]  HEX0, HEX1, HEX2, HEX3,
+             output logic [6:0]  HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7,
              // VGA Interface
              output logic [7:0]  VGA_R,        //VGA Red
                                  VGA_G,        //VGA Green
@@ -71,6 +71,7 @@ module tanks_toplevel( input               CLOCK_50,
 	 logic [2:0] tank_dir1, tank_dir2;
 	 logic [7:0] count;
 	 logic Clk_2;
+	 logic is_any_wall, collides;
 
 	 parameter[9:0] startx1 = 10'd140;
 	 parameter[9:0] starty1 = 10'd240;
@@ -133,7 +134,7 @@ module tanks_toplevel( input               CLOCK_50,
 															.VGA_BLANK_N(VGA_BLANK_N), .VGA_SYNC_N(VGA_SYNC_N),
 															.DrawX(DrawX), .DrawY(DrawY));
 
-	 choose_keycode choose(.keycode(keycode),
+	 choose_keycode choose(.keycode({keycode[7:0], keycode2[7:0]}),
 								  .keycode_p1(keycode_p1), .keycode_p2(keycode_p2)
 								  );
 
@@ -146,7 +147,8 @@ module tanks_toplevel( input               CLOCK_50,
 						  .is_shooting(is_shooting1), .hit(hit1),
 						  .tank_X(tank_X1), .tank_Y(tank_Y1),
 						  .bullet_X(bullet_X1), .bullet_Y(bullet_Y1),
-						  .keycode(keycode_p1)
+						  .keycode(keycode_p1),
+						  .is_any_wall(is_any_wall)
 						  );
 
 	 tank_key tank_p3(.Clk(Clk), .Reset(Reset_h),
@@ -158,7 +160,8 @@ module tanks_toplevel( input               CLOCK_50,
 							.is_shooting(is_shooting2), .hit(hit2),
 							.tank_X(tank_X2), .tank_Y(tank_Y2),
 							.bullet_X(bullet_X2), .bullet_Y(bullet_Y2),
-							.keycode(keycode_p2)
+							.keycode(keycode_p2),
+							.is_any_wall(is_any_wall)
 							);
 
 //	 tank_ai tank_p2(.Clk(Clk), .Reset(Reset_h),
@@ -175,6 +178,7 @@ module tanks_toplevel( input               CLOCK_50,
 					.frame_clk(frame_clk),
 					.DrawX(DrawX), .DrawY(DrawY),
 					.is_wall1(is_wall1), .is_wall2(is_wall2), .is_wall3(is_wall3), .is_wall4(is_wall4),
+					.is_any_wall(is_any_wall),
 					.X1(wallX1), .X2(wallX2), .X3(wallX3), .X4(wallX4), 
 					.Y1(wallY1), .Y2(wallY2), .Y3(wallY3), .Y4(wallY4)
 					);
@@ -193,9 +197,13 @@ module tanks_toplevel( input               CLOCK_50,
 											.VGA_R(VGA_R), .VGA_G(VGA_G), .VGA_B(VGA_B));
 
     // Display keycode on hex display
-    HexDriver hex_inst_0 (keycode_p1[3:0], HEX0);
-    HexDriver hex_inst_1 (keycode_p1[7:4], HEX1);
-	 HexDriver hex_inst_2 (keycode_p2[3:0], HEX2);
-	 HexDriver hex_inst_3 (keycode_p2[7:4], HEX3);
+    HexDriver hex_inst_0 (collides, HEX0);
+    HexDriver hex_inst_1 (is_tank, HEX1);
+	 HexDriver hex_inst_2 (is_any_wall, HEX2);
+//	 HexDriver hex_inst_3 (keycode2[7:4], HEX3);
+//	 HexDriver hex_inst_3 (keycode[19:16], HEX4);
+//	 HexDriver hex_inst_3 (keycode[23:20], HEX5);
+//	 HexDriver hex_inst_3 (keycode[27:24], HEX6);
+//	 HexDriver hex_inst_3 (keycode[7:4], HEX7);
 
 endmodule

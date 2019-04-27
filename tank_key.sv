@@ -8,7 +8,9 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 						output logic [9:0] tank_X, tank_Y,
 						output logic [1:0] hit,
 						output logic [9:0] bullet_X, bullet_Y,
-						input logic [7:0] keycode			 // key that is being pressed
+						input logic [7:0] keycode,			 // key that is being pressed
+						input logic is_any_wall,
+						output logic collides
 					  );
 
 //	 parameter [9:0] X_Start = startx;
@@ -201,6 +203,25 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 					 Y_Motion_in = 1'b0;
 				end
 				
+				if( is_any_wall && is_tank ) begin
+					if(Y_Motion == Y_Step) begin
+						Y_Motion_in = (~(Y_Step) + 1'b1); // 2's complement.
+						X_Motion_in = 1'b0; 
+					end
+					else if(Y_Motion == (~(Y_Step) + 1'b1)) begin
+						Y_Motion_in = Y_Step;
+						X_Motion_in = 1'b0;
+					end
+					else if(X_Motion == X_Step) begin
+						X_Motion_in = (~(X_Step) + 1'b1);  // 2's complement.
+						Y_Motion_in = 1'b0;
+					end
+					else if(X_Motion == (~(X_Step) + 1'b1)) begin
+						X_Motion_in = X_Step;     
+						Y_Motion_in = 1'b0;
+					end
+				end
+				
 				if( Y_Bullet + Bullet_Height >= Y_Max )  // Ball is at the bottom edge, BOUNCE!
 					hit_in = 2'b00;
 				else if ( Y_Bullet <= Y_Min )  // Ball is at the top edge, BOUNCE!
@@ -214,8 +235,15 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 				Y_Pos_in = Y_Pos + Y_Motion;
         end
 
-end
+	 end
 
+	 always_comb begin
+		if (is_tank && is_any_wall)
+			collides = 1'b1;
+		else
+			collides = 1'b0;
+	 end
+	 
 	 assign tank_X = X_Pos;
 	 assign tank_Y = Y_Pos; 
 	 assign bullet_X = X_Bullet;

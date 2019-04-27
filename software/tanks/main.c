@@ -523,8 +523,8 @@ int main(void)
 		printf("\nnext two keycode values are %04x\n",keycode2);
 		// We only need the first keycode, which is at the lower byte of keycode.
 		// Send the keycode to hardware via PIO.
-		*keycode_base = keycode;
-		*keycode2_base = keycode2;
+		*keycode_base = keycode & 0xFF;
+		*keycode2_base = (keycode & 0xFF00) >> 8;
 
 		usleep(200);//usleep(5000);
 		usb_ctl_val = UsbRead(ctl_reg);
