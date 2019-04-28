@@ -3,14 +3,12 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 										  frame_clk,          // The clock indicating a new frame (~60Hz)
 						input [9:0]	  X_Start, Y_Start,
 						input [9:0]   DrawX, DrawY,       // Current pixel coordinates
-						output logic  is_tank, is_shooting, is_bullet,
-						output logic [2:0] tank_dir,
-						output logic [9:0] tank_X, tank_Y,
+						output logic  is_tank, is_bullet,
+						output logic [2:0] tank_dir, bullet_dir,
+						output logic [9:0] tank_X, tank_Y, //saveX, saveY,
 						output logic [1:0] hit,
 						output logic [9:0] bullet_X, bullet_Y,
 						input logic [7:0] keycode,			 // key that is being pressed
-						input logic is_any_wall,
-						output logic collides,
 						input logic can_move
 					  );
 
@@ -32,9 +30,8 @@ module  tank_key ( input         Clk,                // 50 MHz clock
     logic [9:0] X_Pos_in, X_Motion_in, Y_Pos_in, Y_Motion_in;
 	 logic [9:0] X_Bullet_in, Y_Bullet_in, X_Bullet, Y_Bullet;
 	 logic [9:0] X_Bullet_Mot_In, X_Bullet_Mot, Y_Bullet_Mot_In, Y_Bullet_Mot;
-	 logic [2:0] tank_dir_in;
+	 logic [2:0] tank_dir_in, bullet_dir_in;
 	 logic [1:0] hit_in;
-	 logic		 is_shooting_in;
 
 	 initial begin
 		X_Pos_in = X_Start;
@@ -55,6 +52,8 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 		Y_Bullet_Mot = 10'd0;
 		tank_dir = 3'd1;
 		tank_dir_in = 3'd1;
+		bullet_dir = 3'd1;
+		bullet_dir_in = 3'd1;
 		hit = 2'b00;
 		hit_in = 2'b00;	//00 = no bullet on screen, 01 = bullet on screen, 10 = bullet hit wall
 	 end
@@ -78,9 +77,9 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 				Y_Bullet <= 10'd0;
 				X_Bullet_Mot <= 10'd0;
 				Y_Bullet_Mot <= 10'd0;
-				is_shooting <= 1'b0;
 				tank_dir <= 3'd1;
 				hit <= 2'b00;	//No bullet on screen
+				bullet_dir <= 3'd1;
         end
         else
         begin
@@ -93,7 +92,7 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 				X_Bullet_Mot <= X_Bullet_Mot_In;
 				Y_Bullet_Mot <= Y_Bullet_Mot_In;
 				tank_dir <= tank_dir_in;
-				is_shooting <= is_shooting_in;
+				bullet_dir <= bullet_dir_in;
 				hit <= hit_in;
         end
     end
@@ -105,8 +104,8 @@ module  tank_key ( input         Clk,                // 50 MHz clock
         Y_Pos_in = Y_Pos;
         X_Motion_in = X_Motion;
         Y_Motion_in = Y_Motion;
-		  is_shooting_in = is_shooting;
 		  tank_dir_in = tank_dir;
+		  bullet_dir_in = bullet_dir;
 		  X_Bullet_in = X_Bullet;
 		  Y_Bullet_in = Y_Bullet;
 		  X_Bullet_Mot_In = X_Bullet_Mot;
@@ -141,17 +140,16 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 				else begin
 					X_Motion_in = 1'b0;
 					Y_Motion_in = 1'b0;
-					is_shooting_in = 1'b0;
 				end
 				
 				if( (keycode == 8'h2c || keycode == 8'h28) && hit == 2'b00) begin // 'Enter'
 				  X_Motion_in = X_Motion; //Keeps track of previous x motion, so tank can keep moving in that direction
 				  Y_Motion_in = Y_Motion; //Keeps track of previous y motion, so tank can keep moving in that direction
-				  is_shooting_in = 1'b1; 
 				  hit_in = 2'b01;
 				  case (tank_dir)
 						3'd1:
 						begin
+							bullet_dir_in = 3'd1;
 							X_Bullet_in = X_Pos + 9'h10; //Bullet comes out of top center
 							Y_Bullet_in = Y_Pos; //Bullet comes out of top center
 							X_Bullet_Mot_In = 1'b0;
@@ -159,6 +157,7 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 						end
 						3'd2:
 						begin
+							bullet_dir_in = 3'd2;
 							X_Bullet_in = X_Pos + 9'h20; //Bullet comes out of right center
 							Y_Bullet_in = Y_Pos + 9'h10; //Bullet comes out of right center
 							X_Bullet_Mot_In = Bullet_Step;
@@ -166,6 +165,7 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 						end
 						3'd3:
 						begin
+							bullet_dir_in = 3'd3;
 							X_Bullet_in = X_Pos; //Bullet comes out of left center
 							Y_Bullet_in = Y_Pos + 9'h10; //Bullet comes out of left center
 							X_Bullet_Mot_In = (~(Bullet_Step) + 1'b1);
@@ -173,6 +173,7 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 						end
 						3'd4:
 						begin
+							bullet_dir_in = 3'd4;
 							X_Bullet_in = X_Pos + 9'h10; //Bullet comes out of bottom center
 							Y_Bullet_in = Y_Pos + 9'h20; //Bullet comes out of bottom center
 							X_Bullet_Mot_In = 1'b0;
@@ -222,6 +223,7 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 							X_Motion_in = X_Step;     
 							Y_Motion_in = 1'b0;
 						end
+						default: ;
 					endcase
 				end
 				
@@ -238,13 +240,6 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 				Y_Pos_in = Y_Pos + Y_Motion;
         end
 
-	 end
-
-	 always_comb begin
-		if (is_tank && is_any_wall)
-			collides = 1'b1;
-		else
-			collides = 1'b0;
 	 end
 	 
 	 assign tank_X = X_Pos;

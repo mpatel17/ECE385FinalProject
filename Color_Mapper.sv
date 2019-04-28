@@ -14,14 +14,14 @@
 //-------------------------------------------------------------------------
 
 // color_mapper: Decide which color to be output to VGA for each pixel.
-module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2,// is_shooting1, is_shooting2,
-							 input 			start_game,
-							 input 	[1:0] menu_num,
+module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2,
+							 //input 			start_game,
+							 //input 	[1:0] menu_num,
 							 input			is_wall1, is_wall2, is_wall3, is_wall4,
 							 input	[1:0] hit1, hit2,
 							 input	[2:0] tank_dir1, tank_dir2,
-							 input 	[9:0] menuX, menuY,
-							 input 	[9:0] menuboxX, menuboxY,
+							 //input 	[9:0] menuX, menuY,
+							 //input 	[9:0] menuboxX, menuboxY,
 							 input   [9:0] DrawX, DrawY,       // Current pixel coordinates
 							 input	[9:0] tankX1, tankX2, tankY1, tankY2, bulletX1, bulletY1, bulletX2, bulletY2,
 							 input	[9:0] wallX1, wallX2, wallX3, wallX4, wallY1, wallY2, wallY3, wallY4,
@@ -66,57 +66,57 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2,// is_s
  									.data_Out(RGB_wall_v)
 									);
 
-	 framRAM_Menu startmenu (.read_address(menu_addr), .Clk(Clk),
- 									.data_Out(RGB_menu)
-									);
-
-	 frameRAM_Menu_Box menubox (.read_address(menubox_addr), .Clk(Clk),
- 									.data_Out(RGB_menubox)
-									);
+//	 framRAM_Menu startmenu (.read_address(menu_addr), .Clk(Clk),
+// 									.data_Out(RGB_menu)
+//									);
+//
+//	 frameRAM_Menu_Box menubox (.read_address(menubox_addr), .Clk(Clk),
+// 									.data_Out(RGB_menubox)
+//									);
 
     always_comb
     begin
 
-			Red = 24'd183;
-			Green = 24'd254;
-			Blue = 24'd123;
-			tank_addr = 18'd0;
-			bullet_addr = 18'd0;
-			wall_addr_h = 18'd0;
-			wall_addr_v = 18'd0;
+		Red = 24'd183;
+		Green = 24'd254;
+		Blue = 24'd123;
+		tank_addr = 18'd0;
+		bullet_addr = 18'd0;
+		wall_addr_h = 18'd0;
+		wall_addr_v = 18'd0;
 
-			if (start_game == 1'b0) begin
-				Red = 24'h000000;
-				Green = 24'h000000;
-				Blue = 24'h000000;
-
-				menu_addr = (DrawX - menuX) + ((DrawY - menuY) << 3'd5);
-
-				if (RGB_menu != 24'hFF0000) begin
-					Red = RGB_menu[23:16];
-					Green = RGB_menu[15:8];
-					Blue = RGB_menu[7:0];
-				end
-
-				if (menu_num == 2'b01) begin
-					menubox_addr = (DrawX - menuboxX) + ((DrawY - menuboxY) << 3'd5);
-					if (RGB_menubox != 24'hFF0000) begin
-						Red = RGB_menubox[23:16];
-						Green = RGB_menubox[15:8];
-						Blue = RGB_menubox[7:0];
-					end
-				end
-				else if (menu_num == 2'b10) begin
-					menubox_addr = (DrawX - menuboxX) + ((DrawY - menuboxY) << 3'd5);
-					if (RGB_menubox != 24'hFF0000) begin
-						Red = RGB_menubox[23:16];
-						Green = RGB_menubox[15:8];
-						Blue = RGB_menubox[7:0];
-					end
-				end
-			end
-
-		else if (start_game == 1'b1) begin
+//		if (start_game == 1'b0) begin
+//			Red = 24'h000000;
+//			Green = 24'h000000;
+//			Blue = 24'h000000;
+//
+//			menu_addr = (DrawX - menuX) + ((DrawY - menuY) << 3'd5);
+//
+//			if (RGB_menu != 24'hFF0000) begin
+//				Red = RGB_menu[23:16];
+//				Green = RGB_menu[15:8];
+//				Blue = RGB_menu[7:0];
+//			end
+//
+//			if (menu_num == 2'b01) begin
+//				menubox_addr = (DrawX - menuboxX) + ((DrawY - menuboxY) << 3'd5);
+//				if (RGB_menubox != 24'hFF0000) begin
+//					Red = RGB_menubox[23:16];
+//					Green = RGB_menubox[15:8];
+//					Blue = RGB_menubox[7:0];
+//				end
+//			end
+//			else if (menu_num == 2'b10) begin
+//				menubox_addr = (DrawX - menuboxX) + ((DrawY - menuboxY) << 3'd5);
+//				if (RGB_menubox != 24'hFF0000) begin
+//					Red = RGB_menubox[23:16];
+//					Green = RGB_menubox[15:8];
+//					Blue = RGB_menubox[7:0];
+//				end
+//			end
+//		end
+//
+//		else if (start_game == 1'b1) begin
 
 			if (is_tank1 == 1'b1) begin
 				tank_addr = (DrawX - tankX1) + ((DrawY - tankY1) << 3'd5);
@@ -230,7 +230,7 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2,// is_s
 					Blue = RGB_wall_v[7:0];
 				end
 			end
-		end
+//		end
 	end
 
 endmodule
