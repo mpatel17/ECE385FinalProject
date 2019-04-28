@@ -137,7 +137,7 @@ module tanks_toplevel( input               CLOCK_50,
 								  .keycode_p1(keycode_p1), .keycode_p2(keycode_p2)
 								  );
 
-   menu menu_selevt( .Clk(Clk), .Reset(Reset_h), .frame_clk(VGA_VS),
+   menu menu_select( .Clk(Clk), .Reset(Reset_h), .frame_clk(VGA_VS),
                      .DrawX(DrawX), .DrawY(DrawY),
                      .keycode(keycode_p2),
                      .menu_num(menu_num), .start_game(start_game)
