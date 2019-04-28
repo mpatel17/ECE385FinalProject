@@ -71,7 +71,7 @@ module tanks_toplevel( input               CLOCK_50,
 	 logic [2:0] tank_dir1, tank_dir2;
 	 logic [7:0] count;
 	 logic Clk_2;
-	 logic is_any_wall, collides;
+	 logic is_any_wall, collides, can_move1, can_move2;
 
 	 parameter[9:0] startx1 = 10'd140;
 	 parameter[9:0] starty1 = 10'd240;
@@ -148,7 +148,8 @@ module tanks_toplevel( input               CLOCK_50,
 						  .tank_X(tank_X1), .tank_Y(tank_Y1),
 						  .bullet_X(bullet_X1), .bullet_Y(bullet_Y1),
 						  .keycode(keycode_p1),
-						  .is_any_wall(is_any_wall)
+						  .is_any_wall(is_any_wall),
+						  .can_move(can_move1)
 						  );
 
 	 tank_key tank_p3(.Clk(Clk), .Reset(Reset_h),
@@ -161,7 +162,8 @@ module tanks_toplevel( input               CLOCK_50,
 							.tank_X(tank_X2), .tank_Y(tank_Y2),
 							.bullet_X(bullet_X2), .bullet_Y(bullet_Y2),
 							.keycode(keycode_p2),
-							.is_any_wall(is_any_wall)
+							.is_any_wall(is_any_wall),
+							.can_move(can_move2)
 							);
 
 //	 tank_ai tank_p2(.Clk(Clk), .Reset(Reset_h),
@@ -182,6 +184,12 @@ module tanks_toplevel( input               CLOCK_50,
 					.X1(wallX1), .X2(wallX2), .X3(wallX3), .X4(wallX4), 
 					.Y1(wallY1), .Y2(wallY2), .Y3(wallY3), .Y4(wallY4)
 					);
+					
+	 collision hit(.X1(wallX1), .Y1(wallY1), .X2(wallX2), .Y2(wallY2), .X3(wallX3), .Y3(wallY3), .X4(wallX4), .Y4(wallY4),
+						.X_Tank1(tank_X1), .Y_Tank1(tank_Y1), .X_Tank2(tank_X2), .Y_Tank2(tank_Y2), 
+						.tank_dir1(tank_dir1), .tank_dir2(tank_dir2),
+						.can_move1(can_move1), .can_move2(can_move2)
+						);
 
     color_mapper color_instance(	.is_tank1(is_tank1), .is_tank2(is_tank2), .is_bullet1(is_bullet1), .is_bullet2(is_bullet2),
 											//.is_shooting1(is_shooting1), .is_shooting2(is_shooting2),
@@ -197,9 +205,9 @@ module tanks_toplevel( input               CLOCK_50,
 											.VGA_R(VGA_R), .VGA_G(VGA_G), .VGA_B(VGA_B));
 
     // Display keycode on hex display
-    HexDriver hex_inst_0 (collides, HEX0);
-    HexDriver hex_inst_1 (is_tank, HEX1);
-	 HexDriver hex_inst_2 (is_any_wall, HEX2);
+    HexDriver hex_inst_0 (can_move1, HEX0);
+//    HexDriver hex_inst_1 (is_tank, HEX1);
+//	 HexDriver hex_inst_2 (is_any_wall, HEX2);
 //	 HexDriver hex_inst_3 (keycode2[7:4], HEX3);
 //	 HexDriver hex_inst_3 (keycode[19:16], HEX4);
 //	 HexDriver hex_inst_3 (keycode[23:20], HEX5);
