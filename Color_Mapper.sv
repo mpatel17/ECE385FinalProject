@@ -65,9 +65,9 @@ module  color_mapper ( input				   is_tank1, is_tank2, is_bullet1, is_bullet2,//
     always_comb
     begin
 	 
-			Red = 24'hFFFFFF;
-			Green = 24'hFFFFFF;
-			Blue = 24'hFFFFFF;
+			Red = 24'd183;
+			Green = 24'd254;
+			Blue = 24'd123;
 			tank_addr = 18'd0;
 			bullet_addr = 18'd0;
 			wall_addr_h = 18'd0;
