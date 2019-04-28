@@ -10,7 +10,8 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 						output logic [9:0] bullet_X, bullet_Y,
 						input logic [7:0] keycode,			 // key that is being pressed
 						input logic is_any_wall,
-						output logic collides
+						output logic collides,
+						input logic can_move
 					  );
 
 //	 parameter [9:0] X_Start = startx;
@@ -203,23 +204,25 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 					 Y_Motion_in = 1'b0;
 				end
 				
-				if( is_any_wall && is_tank ) begin
-					if(Y_Motion == Y_Step) begin
-						Y_Motion_in = (~(Y_Step) + 1'b1); // 2's complement.
-						X_Motion_in = 1'b0; 
-					end
-					else if(Y_Motion == (~(Y_Step) + 1'b1)) begin
-						Y_Motion_in = Y_Step;
-						X_Motion_in = 1'b0;
-					end
-					else if(X_Motion == X_Step) begin
-						X_Motion_in = (~(X_Step) + 1'b1);  // 2's complement.
-						Y_Motion_in = 1'b0;
-					end
-					else if(X_Motion == (~(X_Step) + 1'b1)) begin
-						X_Motion_in = X_Step;     
-						Y_Motion_in = 1'b0;
-					end
+				if( ~can_move ) begin
+					case(tank_dir) 
+						3'd4: begin
+							Y_Motion_in = (~(Y_Step) + 1'b1); // 2's complement.
+							X_Motion_in = 1'b0; 
+						end
+						3'd1: begin
+							Y_Motion_in = Y_Step;
+							X_Motion_in = 1'b0;
+						end
+						3'd2: begin
+							X_Motion_in = (~(X_Step) + 1'b1);  // 2's complement.
+							Y_Motion_in = 1'b0;
+						end
+						3'd3: begin
+							X_Motion_in = X_Step;     
+							Y_Motion_in = 1'b0;
+						end
+					endcase
 				end
 				
 				if( Y_Bullet + Bullet_Height >= Y_Max )  // Ball is at the bottom edge, BOUNCE!
@@ -249,7 +252,6 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 	 assign bullet_X = X_Bullet;
 	 assign bullet_Y = Y_Bullet;
 	 
-    // Compute whether the pixel corresponds to ball or background
     /* Since the multiplicants are required to be signed, we have to first cast them
        from logic to int (signed by default) before they are multiplied. */
     int DistX, DistY, W, H, DistXB, DistYB, Wb, Hb;

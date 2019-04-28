@@ -2,23 +2,23 @@ module  menu ( input         Clk,                // 50 MHz clock
                              Reset,              // Active-high reset signal
                              frame_clk,          // The clock indicating a new frame (~60Hz)
                input [9:0]   DrawX, DrawY,       // Current pixel coordinates
-					     input logic [7:0] keycode,			 // key that is being pressed
+					input logic [7:0] keycode,			 // key that is being pressed
                output logic [1:0] menu_num,      //Which menu sprite to use (blank, single, double)
                output logic start_game
                output [9:0] menuX, menuY, menuboxX, menuboxY
               );
 
 	 logic [1:0] menu_num_in;
-   logic [9:0] menuboxX_in, menuboxY;
+    logic [9:0] menuboxX_in, menuboxY;
 
 	 initial begin
-		menu_num = 2'b00;
-    menu_num_in = 2'b00;
-    start_game = 1'b0;
-    menuboxX = 10'b00;
-    menuboxX_in = 10'b00;
-    menuboxY = 10'b00;
-    menuboxY_in = 10'b00;
+		 menu_num = 2'b00;
+		 menu_num_in = 2'b00;
+		 start_game = 1'b0;
+		 menuboxX = 10'b00;
+		 menuboxX_in = 10'b00;
+		 menuboxY = 10'b00;
+		 menuboxY_in = 10'b00;
 	 end
 
     // Detect rising edge of frame_clk
@@ -58,13 +58,13 @@ module  menu ( input         Clk,                // 50 MHz clock
 			  // check which menu sprite to display
 				if( keycode == 8'h51 )	// 'Down'
 					menu_num_in = 2'b10;
-          menuboxX = 10'b00;
-          menuboxY = 10'b00;
+				menuboxX = 10'b00;
+				menuboxY = 10'b00;
 
 				else if( keycode == 8'h52 )	// 'Up'
 					menu_num_in = 2'b01;
-          menuboxX = 10'b00;
-          menuboxY = 10'b00;
+				menuboxX = 10'b00;
+				menuboxY = 10'b00;
 
 				else if( keycode == 8'h58 && menu_num != 2'b00) // 'Enter'
 				  if (menu_num == 2'b01)

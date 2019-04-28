@@ -14,19 +14,19 @@
 //-------------------------------------------------------------------------
 
 // color_mapper: Decide which color to be output to VGA for each pixel.
-module  color_mapper ( input				   is_tank1, is_tank2, is_bullet1, is_bullet2,// is_shooting1, is_shooting2,
-								input 				start_game,
-								input 		[1:0] menu_num,
-							  input					is_wall1, is_wall2, is_wall3, is_wall4,
-							  input			[1:0] hit1, hit2,
-							  input			[2:0] tank_dir1, tank_dir2,
-								input 		[9:0] menuX, menuY,
-								input 		[9:0] menuboxX, menuboxY,
-                input     [9:0] DrawX, DrawY,       // Current pixel coordinates
-							  input			[9:0] tankX1, tankX2, tankY1, tankY2, bulletX1, bulletY1, bulletX2, bulletY2,
-							  input			[9:0] wallX1, wallX2, wallX3, wallX4, wallY1, wallY2, wallY3, wallY4,
-							  input					Clk,
-                       output logic [7:0] VGA_R, VGA_G, VGA_B // VGA RGB output
+module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2,// is_shooting1, is_shooting2,
+							 input 			start_game,
+							 input 	[1:0] menu_num,
+							 input			is_wall1, is_wall2, is_wall3, is_wall4,
+							 input	[1:0] hit1, hit2,
+							 input	[2:0] tank_dir1, tank_dir2,
+							 input 	[9:0] menuX, menuY,
+							 input 	[9:0] menuboxX, menuboxY,
+							 input   [9:0] DrawX, DrawY,       // Current pixel coordinates
+							 input	[9:0] tankX1, tankX2, tankY1, tankY2, bulletX1, bulletY1, bulletX2, bulletY2,
+							 input	[9:0] wallX1, wallX2, wallX3, wallX4, wallY1, wallY2, wallY3, wallY4,
+							 input			Clk,
+                      output logic [7:0] VGA_R, VGA_G, VGA_B // VGA RGB output
                      );
 
 	 parameter [9:0] TankWidth = 10'd32;
@@ -118,119 +118,119 @@ module  color_mapper ( input				   is_tank1, is_tank2, is_bullet1, is_bullet2,//
 
 		else if (start_game == 1'b1) begin
 
-		if (is_tank1 == 1'b1) begin
-			tank_addr = (DrawX - tankX1) + ((DrawY - tankY1) << 3'd5);
+			if (is_tank1 == 1'b1) begin
+				tank_addr = (DrawX - tankX1) + ((DrawY - tankY1) << 3'd5);
 
-			case(tank_dir1)
-			3'b001:
-				if (RGB_tanku != 24'hFF0000) begin
-					Red = RGB_tanku[23:16];
-					Green = RGB_tanku[15:8];
-					Blue = RGB_tanku[7:0];
+				case(tank_dir1)
+				3'b001:
+					if (RGB_tanku != 24'hFF0000) begin
+						Red = RGB_tanku[23:16];
+						Green = RGB_tanku[15:8];
+						Blue = RGB_tanku[7:0];
+					end
+
+				3'b010:
+					if (RGB_tankr != 24'hFF0000) begin
+						Red = RGB_tankr[23:16];
+						Green = RGB_tankr[15:8];
+						Blue = RGB_tankr[7:0];
+					end
+
+				3'b011:
+					if (RGB_tankl != 24'hFF0000) begin
+						Red = RGB_tankl[23:16];
+						Green = RGB_tankl[15:8];
+						Blue = RGB_tankl[7:0];
+					end
+
+				3'b100:
+					if (RGB_tankd != 24'hFF0000) begin
+						Red = RGB_tankd[23:16];
+						Green = RGB_tankd[15:8];
+						Blue = RGB_tankd[7:0];
+					end
+				default: ;
+				endcase
+			end
+
+			else if (is_tank2 == 1'b1 ) begin //&& mode == 1'b0) begin
+				tank_addr = (DrawX - tankX2) + ((DrawY - tankY2) << 3'd5);
+
+				case(tank_dir2)
+				3'b001:
+					if (RGB_tanku != 24'hFF0000) begin
+						Red = RGB_tanku[23:16];
+						Green = RGB_tanku[15:8];
+						Blue = RGB_tanku[7:0];
+					end
+
+				3'b010:
+					if (RGB_tankr != 24'hFF0000) begin
+						Red = RGB_tankr[23:16];
+						Green = RGB_tankr[15:8];
+						Blue = RGB_tankr[7:0];
+					end
+
+				3'b011:
+					if (RGB_tankl != 24'hFF0000) begin
+						Red = RGB_tankl[23:16];
+						Green = RGB_tankl[15:8];
+						Blue = RGB_tankl[7:0];
+					end
+
+				3'b100:
+					if (RGB_tankd != 24'hFF0000) begin
+						Red = RGB_tankd[23:16];
+						Green = RGB_tankd[15:8];
+						Blue = RGB_tankd[7:0];
+					end
+
+				default: ;
+				endcase
+			end
+
+			else if (is_bullet1 == 1'b1 && hit1 == 2'b01) begin
+				bullet_addr = (DrawX - bulletX1) + ((DrawY - bulletY1) << 2'd3);
+				if (RGB_bullet != 24'hFFFFFF) begin
+					Red = RGB_bullet[23:16];
+					Green = RGB_bullet[15:8];
+					Blue = RGB_bullet[7:0];
 				end
+			end
 
-			3'b010:
-				if (RGB_tankr != 24'hFF0000) begin
-					Red = RGB_tankr[23:16];
-					Green = RGB_tankr[15:8];
-					Blue = RGB_tankr[7:0];
+			else if (is_bullet2 == 1'b1 && hit2 == 2'b01) begin
+				bullet_addr = (DrawX - bulletX2) + ((DrawY - bulletY2) << 2'd3);
+				if (RGB_bullet != 24'hFFFFFF) begin
+					Red = RGB_bullet[23:16];
+					Green = RGB_bullet[15:8];
+					Blue = RGB_bullet[7:0];
 				end
+			end
 
-			3'b011:
-				if (RGB_tankl != 24'hFF0000) begin
-					Red = RGB_tankl[23:16];
-					Green = RGB_tankl[15:8];
-					Blue = RGB_tankl[7:0];
+			else if (is_wall1 || is_wall3) begin
+				if(is_wall1)
+					wall_addr_h = (DrawX - wallX1) + ((DrawY - wallY1) << 3'd6);
+				else
+					wall_addr_h = (DrawX - wallX3) + ((DrawY - wallY3) << 3'd6);
+				if (RGB_wall_h != 24'hFF0000) begin
+					Red = RGB_wall_h[23:16];
+					Green = RGB_wall_h[15:8];
+					Blue = RGB_wall_h[7:0];
 				end
+			end
 
-			3'b100:
-				if (RGB_tankd != 24'hFF0000) begin
-					Red = RGB_tankd[23:16];
-					Green = RGB_tankd[15:8];
-					Blue = RGB_tankd[7:0];
+			else if (is_wall2 || is_wall4) begin
+				if(is_wall2)
+					wall_addr_v = (DrawX - wallX2) + ((DrawY - wallY2) << 3'd5);
+				else
+					wall_addr_v = (DrawX - wallX4) + ((DrawY - wallY4) << 3'd5);
+				if (RGB_wall_v != 24'hFF0000) begin
+					Red = RGB_wall_v[23:16];
+					Green = RGB_wall_v[15:8];
+					Blue = RGB_wall_v[7:0];
 				end
-			default: ;
-			endcase
-		end
-
-		else if (is_tank2 == 1'b1 ) begin //&& mode == 1'b0) begin
-			tank_addr = (DrawX - tankX2) + ((DrawY - tankY2) << 3'd5);
-
-			case(tank_dir2)
-			3'b001:
-				if (RGB_tanku != 24'hFF0000) begin
-					Red = RGB_tanku[23:16];
-					Green = RGB_tanku[15:8];
-					Blue = RGB_tanku[7:0];
-				end
-
-			3'b010:
-				if (RGB_tankr != 24'hFF0000) begin
-					Red = RGB_tankr[23:16];
-					Green = RGB_tankr[15:8];
-					Blue = RGB_tankr[7:0];
-				end
-
-			3'b011:
-				if (RGB_tankl != 24'hFF0000) begin
-					Red = RGB_tankl[23:16];
-					Green = RGB_tankl[15:8];
-					Blue = RGB_tankl[7:0];
-				end
-
-			3'b100:
-				if (RGB_tankd != 24'hFF0000) begin
-					Red = RGB_tankd[23:16];
-					Green = RGB_tankd[15:8];
-					Blue = RGB_tankd[7:0];
-				end
-
-			default: ;
-			endcase
-		end
-
-		else if (is_bullet1 == 1'b1 && hit1 == 2'b01) begin
-			bullet_addr = (DrawX - bulletX1) + ((DrawY - bulletY1) << 2'd3);
-			if (RGB_bullet != 24'hFFFFFF) begin
-				Red = RGB_bullet[23:16];
-				Green = RGB_bullet[15:8];
-				Blue = RGB_bullet[7:0];
 			end
 		end
-
-		else if (is_bullet2 == 1'b1 && hit2 == 2'b01) begin
-			bullet_addr = (DrawX - bulletX2) + ((DrawY - bulletY2) << 2'd3);
-			if (RGB_bullet != 24'hFFFFFF) begin
-				Red = RGB_bullet[23:16];
-				Green = RGB_bullet[15:8];
-				Blue = RGB_bullet[7:0];
-			end
-		end
-
-		else if (is_wall1 || is_wall3) begin
-			if(is_wall1)
-				wall_addr_h = (DrawX - wallX1) + ((DrawY - wallY1) << 3'd6);
-			else
-				wall_addr_h = (DrawX - wallX3) + ((DrawY - wallY3) << 3'd6);
-			if (RGB_wall_h != 24'hFF0000) begin
-				Red = RGB_wall_h[23:16];
-				Green = RGB_wall_h[15:8];
-				Blue = RGB_wall_h[7:0];
-			end
-		end
-
-		else if (is_wall2 || is_wall4) begin
-			if(is_wall2)
-				wall_addr_v = (DrawX - wallX2) + ((DrawY - wallY2) << 3'd5);
-			else
-				wall_addr_v = (DrawX - wallX4) + ((DrawY - wallY4) << 3'd5);
-			if (RGB_wall_v != 24'hFF0000) begin
-				Red = RGB_wall_v[23:16];
-				Green = RGB_wall_v[15:8];
-				Blue = RGB_wall_v[7:0];
-			end
-		end
-	end
 	end
 
 endmodule
