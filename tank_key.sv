@@ -13,12 +13,12 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 					  );
 
 	 if(player == 1'b0) begin
-		parameter X_Start [9:0] = 
-		parameter Y_Start [9:0] = 
+		 parameter X_Start [9:0] = 10'd100;
+		 parameter Y_Start [9:0] = 10'd240;
 	 end
 	 else if(player == 1'b1) begin
-		parameter X_Start [9:0] = 
-		parameter Y_Start [9:0] = 
+		 parameter X_Start [9:0] = 10'd540;
+		 parameter Y_Start [9:0] = 10'd240;
 	 end
     parameter [9:0] X_Min = 10'd0;       // Leftmost point on the X axis
     parameter [9:0] X_Max = 10'd639;     // Rightmost point on the X axis
