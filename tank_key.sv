@@ -1,19 +1,25 @@
 module  tank_key ( input         Clk,                // 50 MHz clock
 										  Reset,              // Active-high reset signal
 										  frame_clk,          // The clock indicating a new frame (~60Hz)
-						input [9:0]	  X_Start, Y_Start,
+						input 		  player,
 						input [9:0]   DrawX, DrawY,       // Current pixel coordinates
 						output logic  is_tank, is_bullet,
 						output logic [2:0] tank_dir, bullet_dir,
-						output logic [9:0] tank_X, tank_Y, //saveX, saveY,
+						output logic [9:0] tank_X, tank_Y, saveX, saveY,
 						output logic [1:0] hit,
 						output logic [9:0] bullet_X, bullet_Y,
 						input logic [7:0] keycode,			 // key that is being pressed
 						input logic can_move
 					  );
 
-//	 parameter [9:0] X_Start = startx;
-//	 parameter [9:0] Y_Start = starty;
+	 if(player == 1'b0) begin
+		parameter X_Start [9:0] = 
+		parameter Y_Start [9:0] = 
+	 end
+	 else if(player == 1'b1) begin
+		parameter X_Start [9:0] = 
+		parameter Y_Start [9:0] = 
+	 end
     parameter [9:0] X_Min = 10'd0;       // Leftmost point on the X axis
     parameter [9:0] X_Max = 10'd639;     // Rightmost point on the X axis
     parameter [9:0] Y_Min = 10'd0;       // Topmost point on the Y axis
@@ -27,7 +33,7 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 	 parameter [9:0] Bullet_Height = 10'd8;
 
     logic [9:0] X_Pos, X_Motion, Y_Pos, Y_Motion;
-    logic [9:0] X_Pos_in, X_Motion_in, Y_Pos_in, Y_Motion_in;
+    logic [9:0] X_Pos_in, X_Motion_in, Y_Pos_in, Y_Motion_in, saveX_in, saveY_in;
 	 logic [9:0] X_Bullet_in, Y_Bullet_in, X_Bullet, Y_Bullet;
 	 logic [9:0] X_Bullet_Mot_In, X_Bullet_Mot, Y_Bullet_Mot_In, Y_Bullet_Mot;
 	 logic [2:0] tank_dir_in, bullet_dir_in;
@@ -36,10 +42,10 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 	 initial begin
 		X_Pos_in = X_Start;
 		X_Pos = X_Start;
-		X_Motion_in = 10'd0;
-		X_Motion = 10'd0;
 		Y_Pos_in = Y_Start;
 		Y_Pos = Y_Start;
+		X_Motion_in = 10'd0;
+		X_Motion = 10'd0;
 		Y_Motion_in = 10'd0;
 		Y_Motion = 10'd0;
 		X_Bullet_in = 10'd0;
@@ -71,6 +77,8 @@ module  tank_key ( input         Clk,                // 50 MHz clock
         begin
             X_Pos <= X_Start;
             Y_Pos <= Y_Start;
+				saveX <= X_Start;
+				saveY <= Y_Start;
             X_Motion <= 10'd0;
             Y_Motion <= 10'd0;
 				X_Bullet <= 10'd0;
@@ -85,6 +93,8 @@ module  tank_key ( input         Clk,                // 50 MHz clock
         begin
             X_Pos <= X_Pos_in;
             Y_Pos <= Y_Pos_in;
+				saveX <= saveX_in;
+				saveY <= saveY_in;
             X_Motion <= X_Motion_in;
             Y_Motion <= Y_Motion_in;
 				X_Bullet <= X_Bullet_in;
@@ -102,6 +112,8 @@ module  tank_key ( input         Clk,                // 50 MHz clock
         // By default, keep motion and position unchanged and not shooting
         X_Pos_in = X_Pos;
         Y_Pos_in = Y_Pos;
+		  saveX_in = saveX;
+		  saveY_in = saveY;
         X_Motion_in = X_Motion;
         Y_Motion_in = Y_Motion;
 		  tank_dir_in = tank_dir;
@@ -145,6 +157,8 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 				if( (keycode == 8'h2c || keycode == 8'h28) && hit == 2'b00) begin // 'Enter'
 				  X_Motion_in = X_Motion; //Keeps track of previous x motion, so tank can keep moving in that direction
 				  Y_Motion_in = Y_Motion; //Keeps track of previous y motion, so tank can keep moving in that direction
+				  saveX_in = X_Pos;
+				  saveY_in = Y_Pos;
 				  hit_in = 2'b01;
 				  case (tank_dir)
 						3'd1:
@@ -227,14 +241,26 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 					endcase
 				end
 				
-				if( Y_Bullet + Bullet_Height >= Y_Max )  // Ball is at the bottom edge, BOUNCE!
+				if( Y_Bullet + Bullet_Height >= Y_Max )  begin
 					hit_in = 2'b00;
-				else if ( Y_Bullet <= Y_Min )  // Ball is at the top edge, BOUNCE!
+					X_Bullet_Mot_In = 1'b0;
+					Y_Bullet_Mot_In = 1'b0;
+				end
+				else if ( Y_Bullet <= Y_Min )  begin
 					hit_in = 2'b00;
-				else if( X_Bullet + Bullet_Width >= X_Max )  // Ball is at the right edge, BOUNCE!
+					X_Bullet_Mot_In = 1'b0;
+					Y_Bullet_Mot_In = 1'b0;
+				end
+				else if( X_Bullet + Bullet_Width >= X_Max )  begin
 					hit_in = 2'b00;
-				else if ( X_Bullet <= X_Min ) // Ball is at the left edge, BOUNCE!
+					X_Bullet_Mot_In = 1'b0;
+					Y_Bullet_Mot_In = 1'b0;
+				end
+				else if ( X_Bullet <= X_Min ) begin
 					hit_in = 2'b00;
+					X_Bullet_Mot_In = 1'b0;
+					Y_Bullet_Mot_In = 1'b0;
+				end
 				
 				X_Pos_in = X_Pos + X_Motion;
 				Y_Pos_in = Y_Pos + Y_Motion;

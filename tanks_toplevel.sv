@@ -61,22 +61,17 @@ module tanks_toplevel( input               CLOCK_50,
     logic [15:0] hpi_data_in, hpi_data_out;
     logic hpi_r, hpi_w, hpi_cs, hpi_reset;
 
-	 logic [9:0] DrawX, DrawY; //startx1, starty1, startx2, starty2;
+	 logic [9:0] DrawX, DrawY, saveX1, saveY1, saveX2, saveY2;
 	 logic [9:0] tank_X1, tank_X2, tank_Y1, tank_Y2, bullet_X1, bullet_Y1, bullet_X2, bullet_Y2;
 	 logic [9:0] wallX1, wallX2, wallX3, wallX4, wallY1, wallY2, wallY3, wallY4;
-	 logic is_tank1, is_tank2, is_bullet1, is_bullet2, is_shooting1, is_shooting2;
+	 logic is_tank1, is_tank2, is_bullet1, is_bullet2;
 	 logic is_wall1, is_wall2, is_wall3, is_wall4;
 	 logic frame_clk;
-	 logic [1:0] hit1, hit2;
-	 logic [2:0] tank_dir1, tank_dir2;
+	 logic [1:0] hit1, hit2, hit1_2, hit2_2;
+	 logic [2:0] tank_dir1, tank_dir2, bullet_dir1, bullet_dir2;
 	 logic [7:0] count;
 	 logic Clk_2;
-	 logic can_move1, can_move2;
-
-	 parameter[9:0] startx1 = 10'd140;
-	 parameter[9:0] starty1 = 10'd240;
-	 parameter[9:0] startx2 = 10'd500;
-	 parameter[9:0] starty2 = 10'd240;
+	 logic can_move1, can_move2, tank1_alive, tank2_alive;
 
     // Interface between NIOS II and EZ-OTG chip
     hpi_io_intf hpi_io_inst(
@@ -138,20 +133,20 @@ module tanks_toplevel( input               CLOCK_50,
 								  .keycode_p1(keycode_p1), .keycode_p2(keycode_p2)
 								  );
 
-    menu menu_select( .Clk(Clk), .Reset(Reset_h), .frame_clk(VGA_VS),
-                     .DrawX(DrawX), .DrawY(DrawY),
-                     .keycode(keycode_p2),
-                     .menu_num(menu_num), .start_game(start_game)
-                    );
+//    menu menu_select( .Clk(Clk), .Reset(Reset_h), .frame_clk(VGA_VS),
+//                     .DrawX(DrawX), .DrawY(DrawY),
+//                     .keycode(keycode_p2),
+//                     .menu_num(menu_num), .start_game(start_game)
+//                    );
 
 	 tank_key tank_p1(.Clk(Clk), .Reset(Reset_h),
 						  .frame_clk(VGA_VS),
-						  .X_Start(startx1), .Y_Start(starty1),
+						  .player(1'b0),
 						  .DrawX(DrawX), .DrawY(DrawY),
 						  .is_tank(is_tank1), .is_bullet(is_bullet1),
-						  .tank_dir(tank_dir1),
-						  .is_shooting(is_shooting1), .hit(hit1),
-						  .tank_X(tank_X1), .tank_Y(tank_Y1),
+						  .tank_dir(tank_dir1), .bullet_dir(bullet_dir1),
+						  .hit(hit1),
+						  .tank_X(tank_X1), .tank_Y(tank_Y1), .saveX(saveX1), .saveY(saveY1),
 						  .bullet_X(bullet_X1), .bullet_Y(bullet_Y1),
 						  .keycode(keycode_p1),
 						  .can_move(can_move1)
@@ -159,12 +154,12 @@ module tanks_toplevel( input               CLOCK_50,
 
 	 tank_key tank_p3(.Clk(Clk), .Reset(Reset_h),
 							.frame_clk(VGA_VS),
-							.X_Start(startx2), .Y_Start(starty2),
+							.player(1'b1),
 							.DrawX(DrawX), .DrawY(DrawY),
 							.is_tank(is_tank2), .is_bullet(is_bullet2),
-							.tank_dir(tank_dir2),
-							.is_shooting(is_shooting2), .hit(hit2),
-							.tank_X(tank_X2), .tank_Y(tank_Y2),
+							.tank_dir(tank_dir2), .bullet_dir(bullet_dir2),
+							.hit(hit2),
+							.tank_X(tank_X2), .tank_Y(tank_Y2), .saveX(saveX2), .saveY(saveY2),
 							.bullet_X(bullet_X2), .bullet_Y(bullet_Y2),
 							.keycode(keycode_p2),
 							.can_move(can_move2)
@@ -190,15 +185,18 @@ module tanks_toplevel( input               CLOCK_50,
 					
 	 collision hit(.X1(wallX1), .Y1(wallY1), .X2(wallX2), .Y2(wallY2), .X3(wallX3), .Y3(wallY3), .X4(wallX4), .Y4(wallY4),
 						.X_Tank1(tank_X1), .Y_Tank1(tank_Y1), .X_Tank2(tank_X2), .Y_Tank2(tank_Y2), 
-						.tank_dir1(tank_dir1), .tank_dir2(tank_dir2),
-						.can_move1(can_move1), .can_move2(can_move2)
+						.saveX1(saveX1), .saveY1(saveY1), .saveX2(saveX2), .saveY2(saveY2),
+						.X_Bullet1(bullet_X1), .Y_Bullet1(bullet_Y1), .X_Bullet2(bullet_X2), .Y_Bullet2(bullet_Y2),
+						.tank_dir1(tank_dir1), .tank_dir2(tank_dir2), .bullet_dir1(bullet_dir1), .bullet_dir2(bullet_dir2),
+						.can_move1(can_move1), .can_move2(can_move2), .tank1_alive(tank1_alive), .tank2_alive(tank2_alive),
+						.hit1(hit1_2), .hit2(hit2_2)
 						);
 
-    color_mapper color_instance( .start_game(start_game), .menu_num(menu_num), .menuX(menuX), .menuY(menuY), menuboxX(menuboxX), .menuboxY(menuboxY),
-                      .is_tank1(is_tank1), .is_tank2(is_tank2), .is_bullet1(is_bullet1), .is_bullet2(is_bullet2),
-											//.is_shooting1(is_shooting1), .is_shooting2(is_shooting2),
+    color_mapper color_instance( //.start_game(start_game), .menu_num(menu_num), .menuX(menuX), .menuY(menuY), menuboxX(menuboxX), .menuboxY(menuboxY),
+											.is_tank1(is_tank1), .is_tank2(is_tank2), .is_bullet1(is_bullet1), .is_bullet2(is_bullet2),
+											.tank1_alive(tank1_alive), .tank2_alive(tank2_alive),
 											.is_wall1(is_wall1), .is_wall2(is_wall2), .is_wall3(is_wall3), .is_wall4(is_wall4),
-											.hit1(hit1), .hit2(hit2),
+											.hit1(hit1 & hit1_2), .hit2(hit2 & hit2_2),
 											.tank_dir1(tank_dir1), .tank_dir2(tank_dir2),
 											.DrawX(DrawX), .DrawY(DrawY),
 											.tankX1(tank_X1), .tankX2(tank_X2), .tankY1(tank_Y1), .tankY2(tank_Y2),
@@ -206,12 +204,13 @@ module tanks_toplevel( input               CLOCK_50,
 											.wallY1(wallY1), .wallY2(wallY2), .wallY3(wallY3), .wallY4(wallY4),
 											.bulletX1(bullet_X1), .bulletY1(bullet_Y1), .bulletX2(bullet_X2), .bulletY2(bullet_Y2),
 											.Clk(Clk),
-											.VGA_R(VGA_R), .VGA_G(VGA_G), .VGA_B(VGA_B));
+											.VGA_R(VGA_R), .VGA_G(VGA_G), .VGA_B(VGA_B)
+											);
 
     // Display keycode on hex display
-    HexDriver hex_inst_0 (keycode_p1[3:0], HEX0);
-    HexDriver hex_inst_1 (keycode_p1[7:4], HEX1);
-	 HexDriver hex_inst_2 (keycode_p2[3:0], HEX2);
-	 HexDriver hex_inst_3 (keycode_p2[7:4], HEX3);
+    HexDriver hex_inst_0 (tank1_alive, HEX0);
+//    HexDriver hex_inst_1 (hit1_2, HEX1);
+	 HexDriver hex_inst_2 (tank2_alive, HEX2);
+//	 HexDriver hex_inst_3 (hit2_2, HEX3);
 
 endmodule
