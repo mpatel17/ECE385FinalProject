@@ -210,7 +210,7 @@ module tanks_toplevel( input               CLOCK_50,
 											.wallX1(wallX1), .wallX2(wallX2), .wallX3(wallX3), .wallX4(wallX4),
 											.wallY1(wallY1), .wallY2(wallY2), .wallY3(wallY3), .wallY4(wallY4),
 											.bulletX1(bullet_X1), .bulletY1(bullet_Y1), .bulletX2(bullet_X2), .bulletY2(bullet_Y2),
-											.Clk(Clk),
+											.Clk(Clk), .Reset(Reset_h),
 											.VGA_R(VGA_R), .VGA_G(VGA_G), .VGA_B(VGA_B)
 											);
 

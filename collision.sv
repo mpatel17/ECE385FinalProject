@@ -3,7 +3,7 @@ module collision (input [9:0] X1, Y1, X2, Y2, X3, Y3, X4, Y4, //Walls
 						input [9:0] saveX1, saveY1, saveX2, saveY2,
 						input [9:0] X_Bullet1, Y_Bullet1, X_Bullet2, Y_Bullet2,
                   input [2:0] tank_dir1, tank_dir2, bullet_dir1, bullet_dir2,
-						output can_move1, can_move2, tank_hit1, tank_hit2, tank1_alive, tank2_alive,
+						output can_move1, can_move2, tank1_alive, tank2_alive,
 						output [1:0] hit1, hit2
                   );
 						

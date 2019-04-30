@@ -45,10 +45,6 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 	 end
 	 
 	 initial begin
-		X_Pos_in = X_Start;
-		X_Pos = X_Start;
-		Y_Pos_in = Y_Start;
-		Y_Pos = Y_Start;
 		X_Motion_in = 10'd0;
 		X_Motion = 10'd0;
 		Y_Motion_in = 10'd0;

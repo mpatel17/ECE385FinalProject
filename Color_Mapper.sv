@@ -25,26 +25,26 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
 							 input   [9:0] DrawX, DrawY,       // Current pixel coordinates
 							 input	[9:0] tankX1, tankX2, tankY1, tankY2, bulletX1, bulletY1, bulletX2, bulletY2,
 							 input	[9:0] wallX1, wallX2, wallX3, wallX4, wallY1, wallY2, wallY3, wallY4,
-							 input			Clk,
+							 input			Clk, Reset,
                       output logic [7:0] VGA_R, VGA_G, VGA_B // VGA RGB output
                      );
 
 	 logic [9:0] gameoverX, gameoverY, playerX, playerY;
 
     logic [7:0] Red, Green, Blue;
-	 logic [18:0] tank_addr, bullet_addr, wall_addr_v, wall_addr_h, gameover_addr;
-	 logic [23:0] RGB_tanku, RGB_tankr, RGB_tankl, RGB_tankd, RGB_bullet, RGB_wall_v, RGB_wall_h, RGB_gameover1, RGB_gameover2;
-	 logic mode;
+	 logic [18:0] tank_addr, bullet_addr, wall_addr_v, wall_addr_h, gameover_addr, p1_addr, p2_addr;
+	 logic [23:0] RGB_tanku, RGB_tankr, RGB_tankl, RGB_tankd, RGB_bullet, RGB_wall_v, RGB_wall_h, RGB_gameover, RGB_p1, RGB_p2;
+	 logic mode, flag1, flag1_in, flag2, flag2_in;
 
     // Output colors to VGA
     assign VGA_R = Red;
     assign VGA_G = Green;
     assign VGA_B = Blue;
 	 assign mode = 1'b0;
-	 assign gameoverX = 10'd150;
-	 assign gameoverY = 10'd100;
-	 assign playerX = 10'd218;
-	 assign playerY = 10'd136;
+	 assign gameoverX = 10'd250;
+	 assign gameoverY = 10'd200;
+	 assign playerX = 10'd314;
+	 assign playerY = 10'd232;
 
 	 frameRAM_Tank_1 tank_u(.read_address(tank_addr), .Clk(Clk),
 								  .data_Out(RGB_tanku)
@@ -69,13 +69,17 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
  									.data_Out(RGB_wall_v)
 									);
 									
-//	 frameRAM_Player1Wins gameover1 (.read_address(gameover_addr), .Clk(Clk),
-//												.data_Out(RGB_gameover1)
-//												);
-//	 
-//	 frameRAM_Player2Wins gameover2 (.read_address(gameover_addr), .Clk(Clk),
-//												.data_Out(RGB_gameover2)
-//												);
+	 frameRAM_GameOver gameover (.read_address(gameover_addr), .Clk(Clk),
+											.data_Out(RGB_gameover)
+											);
+									
+	 frameRAM_Player1 p1wins (.read_address(p1_addr), .Clk(Clk),
+									  .data_Out(RGB_p1)
+									  );
+	 
+	 frameRAM_Player2 p2wins (.read_address(p2_addr), .Clk(Clk),
+									  .data_Out(RGB_p2)
+									  );
 
 //	 framRAM_Menu startmenu (.read_address(menu_addr), .Clk(Clk),
 // 									.data_Out(RGB_menu)
@@ -85,52 +89,74 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
 // 									.data_Out(RGB_menubox)
 //									);
 
+	 always_ff @ (posedge Clk) begin
+		if (Reset) begin
+			flag1 <= 1'b0;
+			flag2 <= 1'b0;
+		end
+		else begin
+			flag1 <= flag1_in;
+			flag2 <= flag2_in;
+		end
+	 end
+
     always_comb
     begin
 
-		Red = 24'd183;
-		Green = 24'd254;
-		Blue = 24'd123;
+		flag1_in = flag1;
+		flag2_in = flag2;
 		tank_addr = 18'd0;
 		bullet_addr = 18'd0;
 		wall_addr_h = 18'd0;
 		wall_addr_v = 18'd0;
 		gameover_addr = 18'd0;
+		p1_addr = 18'd0;
+		p2_addr = 18'd0;
+		
+		if(~tank1_alive)
+			flag1_in = 1'b1;
+		if(~tank2_alive)
+			flag2_in = 1'b1;
+			
+		if(flag1 || flag2) begin
+			Red = 8'h00;
+			Green = 8'h00;
+			Blue = 8'h00;
+			
+			if(DrawX > 250 && DrawX < 378 && DrawY > 200 && DrawY < 264) begin
+					gameover_addr = (DrawX - gameoverX) + ((DrawY - gameoverY) << 7);
+					if(RGB_gameover != 24'hFF0000) begin
+						Red = RGB_gameover[23:16];
+						Green = RGB_gameover[15:8];
+						Blue = RGB_gameover[7:0];
+					end
+				end 
+				if(DrawX > 314 && DrawX < 330 && DrawY > 232 && DrawY < 248) begin
+					if(flag1) begin
+						p1_addr = (DrawX - playerX) + ((DrawY - playerY) << 4);
+						if(RGB_p1 != 24'hFF0000) begin
+							Red = RGB_p1[23:16];
+							Green = RGB_p1[15:8];
+							Blue = RGB_p1[7:0];
+						end
+					end
+					
+					else begin
+						p2_addr = (DrawX - playerX) + ((DrawY - playerY) << 4);
+						if(RGB_p2 != 24'hFF0000) begin
+							Red = RGB_p2[23:16];
+							Green = RGB_p2[15:8];
+							Blue = RGB_p2[7:0];
+						end
+					end
+				end
+		end else begin
+		
+			Red = 8'd183;
+			Green = 8'd254;
+			Blue = 8'd123;
 
-//		if (start_game == 1'b0) begin
-//			Red = 24'h000000;
-//			Green = 24'h000000;
-//			Blue = 24'h000000;
-//
-//			menu_addr = (DrawX - menuX) + ((DrawY - menuY) << 3'd5);
-//
-//			if (RGB_menu != 24'hFF0000) begin
-//				Red = RGB_menu[23:16];
-//				Green = RGB_menu[15:8];
-//				Blue = RGB_menu[7:0];
-//			end
-//
-//			if (menu_num == 2'b01) begin
-//				menubox_addr = (DrawX - menuboxX) + ((DrawY - menuboxY) << 3'd5);
-//				if (RGB_menubox != 24'hFF0000) begin
-//					Red = RGB_menubox[23:16];
-//					Green = RGB_menubox[15:8];
-//					Blue = RGB_menubox[7:0];
-//				end
-//			end
-//			else if (menu_num == 2'b10) begin
-//				menubox_addr = (DrawX - menuboxX) + ((DrawY - menuboxY) << 3'd5);
-//				if (RGB_menubox != 24'hFF0000) begin
-//					Red = RGB_menubox[23:16];
-//					Green = RGB_menubox[15:8];
-//					Blue = RGB_menubox[7:0];
-//				end
-//			end
-//		end
-//
-//		else if (start_game == 1'b1) begin
-
-			if (is_tank1 && tank1_alive) begin
+			if (is_tank1 && tank1_alive && tank2_alive) begin
 				tank_addr = (DrawX - tankX1) + ((DrawY - tankY1) << 3'd5);
 
 				case(tank_dir1)
@@ -165,7 +191,7 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
 				endcase
 			end
 
-			else if (is_tank2 && tank2_alive) begin //&& mode == 1'b0) begin
+			else if (is_tank2 && tank2_alive && tank1_alive) begin //&& mode == 1'b0) begin
 				tank_addr = (DrawX - tankX2) + ((DrawY - tankY2) << 3'd5);
 
 				case(tank_dir2)
@@ -252,29 +278,8 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
 					Blue = RGB_wall_v[7:0];
 				end
 			end
-			
-			// (68, 36) into game over sprite!! 
-			
-//			if(~tank1_alive) begin
-//				gameover_addr = (DrawX - gameoverX) + ((DrawY - gameoverY) << 4'd9);
-//				if(RGB_gameover1 != 24'hFF0000) begin
-//					Red = RGB_gameover1[23:16];
-//					Green = RGB_gameover1[15:8];
-//					Blue = RGB_gameover1[7:0];
-//				end
-//			end
-//			
-//			else if(~tank2_alive) begin
-//				gameover_addr = (DrawX - gameoverX) + ((DrawY - gameoverY) << 4'd9);
-//				if(RGB_gameover2 != 24'hFF0000) begin
-//					Red = RGB_gameover2[23:16];
-//					Green = RGB_gameover2[15:8];
-//					Blue = RGB_gameover2[7:0];
-//				end
-//			end
-//		end
+		end
 	end
-
 endmodule
 
 //		else if (is_tank3 == 1'b1 && mode == 1'b1) begin
@@ -311,3 +316,38 @@ endmodule
 //			default: ;
 //			endcase
 //		end
+
+
+//		if (start_game == 1'b0) begin
+//			Red = 24'h000000;
+//			Green = 24'h000000;
+//			Blue = 24'h000000;
+//
+//			menu_addr = (DrawX - menuX) + ((DrawY - menuY) << 3'd5);
+//
+//			if (RGB_menu != 24'hFF0000) begin
+//				Red = RGB_menu[23:16];
+//				Green = RGB_menu[15:8];
+//				Blue = RGB_menu[7:0];
+//			end
+//
+//			if (menu_num == 2'b01) begin
+//				menubox_addr = (DrawX - menuboxX) + ((DrawY - menuboxY) << 3'd5);
+//				if (RGB_menubox != 24'hFF0000) begin
+//					Red = RGB_menubox[23:16];
+//					Green = RGB_menubox[15:8];
+//					Blue = RGB_menubox[7:0];
+//				end
+//			end
+//			else if (menu_num == 2'b10) begin
+//				menubox_addr = (DrawX - menuboxX) + ((DrawY - menuboxY) << 3'd5);
+//				if (RGB_menubox != 24'hFF0000) begin
+//					Red = RGB_menubox[23:16];
+//					Green = RGB_menubox[15:8];
+//					Blue = RGB_menubox[7:0];
+//				end
+//			end
+//		end
+//
+//		else if (start_game == 1'b1) begin
+
