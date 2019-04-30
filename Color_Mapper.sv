@@ -200,22 +200,32 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
 				default: ;
 				endcase
 			end
-
-			else if (is_bullet1 && hit1 == 2'b01 && tank2_alive && (DrawX > 3'd5) && (DrawY > 3'd5)) begin
+			// what thuhhhhhhh...?
+			else if (is_bullet1 && hit1 == 2'b01 && tank2_alive)begin// && (DrawX > 3'd5) && (DrawY > 3'd5)) begin
 				bullet_addr = (DrawX - bulletX1) + ((DrawY - bulletY1) << 2'd3);
 				if (RGB_bullet != 24'hFFFFFF) begin
 					Red = RGB_bullet[23:16];
 					Green = RGB_bullet[15:8];
 					Blue = RGB_bullet[7:0];
 				end
+				if (DrawX < 9 && DrawY < 9) begin
+					Red = 24'd183;
+					Green = 24'd254;
+					Blue = 24'd123;
+				end
 			end
 
-			else if (is_bullet2 && hit2 == 2'b01 && tank1_alive && (DrawX > 3'd5) && (DrawY > 3'd5)) begin
+			else if (is_bullet2 && hit2 == 2'b01 && tank1_alive ) begin//&& (DrawX > 3'd5) && (DrawY > 3'd5)) begin
 				bullet_addr = (DrawX - bulletX2) + ((DrawY - bulletY2) << 2'd3);
 				if (RGB_bullet != 24'hFFFFFF) begin
 					Red = RGB_bullet[23:16];
 					Green = RGB_bullet[15:8];
 					Blue = RGB_bullet[7:0];
+				end
+				if (DrawX < 9 && DrawY < 9) begin
+					Red = 24'd183;
+					Green = 24'd254;
+					Blue = 24'd123;
 				end
 			end
 
