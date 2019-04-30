@@ -139,9 +139,15 @@ module tanks_toplevel( input               CLOCK_50,
 //                     .menu_num(menu_num), .start_game(start_game)
 //                    );
 
+//		timer timer( .Clk(Clk), .Reset(Reset), .DrawX(DrawX), .DrawY(DrawY),
+//    						.one_sec(one_sec), .one_min(one_min),
+//    						.ten_sec(ten_sec), .ten_min(ten_min)
+//    						);
+
 	 tank_key tank_p1(.Clk(Clk), .Reset(Reset_h),
 						  .frame_clk(VGA_VS),
 						  .player(1'b0),
+						  .bull_hit(hit1_2),
 						  .DrawX(DrawX), .DrawY(DrawY),
 						  .is_tank(is_tank1), .is_bullet(is_bullet1),
 						  .tank_dir(tank_dir1), .bullet_dir(bullet_dir1),
@@ -155,6 +161,7 @@ module tanks_toplevel( input               CLOCK_50,
 	 tank_key tank_p3(.Clk(Clk), .Reset(Reset_h),
 							.frame_clk(VGA_VS),
 							.player(1'b1),
+							.bull_hit(hit2_2),
 							.DrawX(DrawX), .DrawY(DrawY),
 							.is_tank(is_tank2), .is_bullet(is_bullet2),
 							.tank_dir(tank_dir2), .bullet_dir(bullet_dir2),

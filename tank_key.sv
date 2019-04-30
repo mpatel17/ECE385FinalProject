@@ -2,6 +2,7 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 										  Reset,              // Active-high reset signal
 										  frame_clk,          // The clock indicating a new frame (~60Hz)
 						input 		  player,
+						input [1:0]   bull_hit,
 						input [9:0]   DrawX, DrawY,       // Current pixel coordinates
 						output logic  is_tank, is_bullet,
 						output logic [2:0] tank_dir, bullet_dir,
@@ -11,15 +12,7 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 						input logic [7:0] keycode,			 // key that is being pressed
 						input logic can_move
 					  );
-
-	 if(player == 1'b0) begin
-		 parameter X_Start [9:0] = 10'd100;
-		 parameter Y_Start [9:0] = 10'd240;
-	 end
-	 else if(player == 1'b1) begin
-		 parameter X_Start [9:0] = 10'd540;
-		 parameter Y_Start [9:0] = 10'd240;
-	 end
+	
     parameter [9:0] X_Min = 10'd0;       // Leftmost point on the X axis
     parameter [9:0] X_Max = 10'd639;     // Rightmost point on the X axis
     parameter [9:0] Y_Min = 10'd0;       // Topmost point on the Y axis
@@ -32,6 +25,7 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 	 parameter [9:0] Bullet_Width = 10'd8;
 	 parameter [9:0] Bullet_Height = 10'd8;
 
+	 logic [9:0] X_Start, Y_Start;
     logic [9:0] X_Pos, X_Motion, Y_Pos, Y_Motion;
     logic [9:0] X_Pos_in, X_Motion_in, Y_Pos_in, Y_Motion_in, saveX_in, saveY_in;
 	 logic [9:0] X_Bullet_in, Y_Bullet_in, X_Bullet, Y_Bullet;
@@ -39,6 +33,17 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 	 logic [2:0] tank_dir_in, bullet_dir_in;
 	 logic [1:0] hit_in;
 
+	 always_comb begin
+		 if(player == 1'b0) begin
+			 X_Start = 10'd100;
+			 Y_Start = 10'd240;
+		 end
+		 else begin
+			 X_Start = 10'd540;
+			 Y_Start = 10'd240;
+		 end
+	 end
+	 
 	 initial begin
 		X_Pos_in = X_Start;
 		X_Pos = X_Start;
@@ -195,6 +200,12 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 						end
 						default: ;
 				  endcase
+				end
+				else if(bull_hit == 2'b00) begin
+					X_Bullet_in = 10'd0;
+					Y_Bullet_in = 10'd0;
+					X_Bullet_Mot_In = 10'd0;
+					Y_Bullet_Mot_In = 10'd0;
 				end
 				else begin
 					X_Bullet_in = X_Bullet + X_Bullet_Mot;	//Bullet will come out of appropriate direction

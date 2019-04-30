@@ -4,7 +4,7 @@
  *
  */
 
-module  frameRAM_Player1Wins
+module  frameRAM_Player1
 (
 		input [18:0] read_address,
 		input Clk,
@@ -12,22 +12,18 @@ module  frameRAM_Player1Wins
 		output logic [23:0] data_Out
 );
 
-logic [23:0] palette [5:0];
+logic [23:0] palette [1:0];
 logic [2:0] index;
 
 // mem has width of 2 bits and a total of 12000 addresses
-logic [2:0] mem [0:49151];
+logic [2:0] mem [0:255];
 
-assign palette[0] = 24'hFF0000;
-assign palette[1] = 24'h000000;
-assign palette[2] = 24'h9ff5ff;
-assign palette[3] = 24'h004f57;
-assign palette[4] = 24'h484848;
-assign palette[5] = 24'h8a4bfe;
+assign palette[0] = 24'h000000;
+assign palette[1] = 24'hffffff;
 
 initial
 begin
-	 $readmemh("sprite_bytes/Player1_Wins.txt", mem);
+	 $readmemh("sprite_bytes/Player1.txt", mem);
 end
 
 assign index = mem[read_address];
