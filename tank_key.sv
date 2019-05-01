@@ -197,7 +197,7 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 						default: ;
 				  endcase
 				end
-				else if(bull_hit == 2'b00) begin
+				else if(hit == 2'b00 || bull_hit == 2'b00) begin
 					X_Bullet_in = 10'd0;
 					Y_Bullet_in = 10'd0;
 					X_Bullet_Mot_In = 10'd0;

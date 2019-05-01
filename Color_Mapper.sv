@@ -25,6 +25,7 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
 							 input   [9:0] DrawX, DrawY,       // Current pixel coordinates
 							 input	[9:0] tankX1, tankX2, tankY1, tankY2, bulletX1, bulletY1, bulletX2, bulletY2,
 							 input	[9:0] wallX1, wallX2, wallX3, wallX4, wallY1, wallY2, wallY3, wallY4,
+							 input 	[2:0] count1, count2, count3, count4,
 							 input			Clk, Reset,
                       output logic [7:0] VGA_R, VGA_G, VGA_B // VGA RGB output
                      );
@@ -156,7 +157,7 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
 			Green = 8'd254;
 			Blue = 8'd123;
 
-			if (is_tank1 && tank1_alive && tank2_alive) begin
+			if (is_tank1) begin
 				tank_addr = (DrawX - tankX1) + ((DrawY - tankY1) << 3'd5);
 
 				case(tank_dir1)
@@ -191,7 +192,7 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
 				endcase
 			end
 
-			else if (is_tank2 && tank2_alive && tank1_alive) begin //&& mode == 1'b0) begin
+			else if (is_tank2) begin //&& mode == 1'b0) begin
 				tank_addr = (DrawX - tankX2) + ((DrawY - tankY2) << 3'd5);
 
 				case(tank_dir2)
@@ -227,7 +228,7 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
 				endcase
 			end
 			// what thuhhhhhhh...?
-			else if (is_bullet1 && hit1 == 2'b01 && tank2_alive)begin// && (DrawX > 3'd5) && (DrawY > 3'd5)) begin
+			else if (is_bullet1 && hit1 == 2'b01 )begin// && (DrawX > 3'd5) && (DrawY > 3'd5)) begin
 				bullet_addr = (DrawX - bulletX1) + ((DrawY - bulletY1) << 2'd3);
 				if (RGB_bullet != 24'hFFFFFF) begin
 					Red = RGB_bullet[23:16];
@@ -241,7 +242,7 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
 				end
 			end
 
-			else if (is_bullet2 && hit2 == 2'b01 && tank1_alive ) begin//&& (DrawX > 3'd5) && (DrawY > 3'd5)) begin
+			else if (is_bullet2 && hit2 == 2'b01 ) begin//&& (DrawX > 3'd5) && (DrawY > 3'd5)) begin
 				bullet_addr = (DrawX - bulletX2) + ((DrawY - bulletY2) << 2'd3);
 				if (RGB_bullet != 24'hFFFFFF) begin
 					Red = RGB_bullet[23:16];
@@ -255,29 +256,90 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
 				end
 			end
 
-			else if ((is_wall1 || is_wall3) && tank1_alive && tank2_alive) begin
-				if(is_wall1)
-					wall_addr_h = (DrawX - wallX1) + ((DrawY - wallY1) << 3'd6);
-				else
-					wall_addr_h = (DrawX - wallX3) + ((DrawY - wallY3) << 3'd6);
+			else if (is_wall1 && (count1 < 3)) begin
+				wall_addr_h = (DrawX - wallX1) + ((DrawY - wallY1) << 3'd6);
 				if (RGB_wall_h != 24'hFF0000) begin
-					Red = RGB_wall_h[23:16];
-					Green = RGB_wall_h[15:8];
-					Blue = RGB_wall_h[7:0];
+					if(count1 == 0) begin
+						Red = RGB_wall_h[23:16];
+						Green = RGB_wall_h[15:8];
+						Blue = RGB_wall_h[7:0];
+					end
+					else if(count1 == 1) begin
+						Red = (RGB_wall_h[23:16] + 50) % 255;
+						Green = (RGB_wall_h[15:8] + 50) % 255;
+						Blue = (RGB_wall_h[7:0] + 50) % 255;
+					end
+					else begin
+						Red = (RGB_wall_h[23:16] + 100) % 255;
+						Green = (RGB_wall_h[15:8] + 100) % 255;
+						Blue = (RGB_wall_h[7:0] + 100) % 255;
+					end
+				end
+			end
+			
+			else if (is_wall3 && (count3 < 3)) begin
+				wall_addr_h = (DrawX - wallX3) + ((DrawY - wallY3) << 3'd6);
+				if (RGB_wall_h != 24'hFF0000) begin
+					if(count3 == 0) begin
+						Red = RGB_wall_h[23:16];
+						Green = RGB_wall_h[15:8];
+						Blue = RGB_wall_h[7:0];
+					end
+					else if(count3 == 1) begin
+						Red = (RGB_wall_h[23:16] + 50) % 255;
+						Green = (RGB_wall_h[15:8] + 50) % 255;
+						Blue = (RGB_wall_h[7:0] + 50) % 255;
+					end
+					else begin
+						Red = (RGB_wall_h[23:16] + 100) % 255;
+						Green = (RGB_wall_h[15:8] + 100) % 255;
+						Blue = (RGB_wall_h[7:0] + 100) % 255;
+					end
 				end
 			end
 
-			else if ((is_wall2 || is_wall4) && tank1_alive && tank2_alive) begin
-				if(is_wall2)
-					wall_addr_v = (DrawX - wallX2) + ((DrawY - wallY2) << 3'd5);
-				else
-					wall_addr_v = (DrawX - wallX4) + ((DrawY - wallY4) << 3'd5);
+			else if (is_wall2 && (count2 < 3)) begin
+				wall_addr_v = (DrawX - wallX2) + ((DrawY - wallY2) << 3'd5);
 				if (RGB_wall_v != 24'hFF0000) begin
-					Red = RGB_wall_v[23:16];
-					Green = RGB_wall_v[15:8];
-					Blue = RGB_wall_v[7:0];
+					if(count2 == 0) begin
+						Red = RGB_wall_v[23:16];
+						Green = RGB_wall_v[15:8];
+						Blue = RGB_wall_v[7:0];
+					end
+					else if(count2 == 1) begin
+						Red = (RGB_wall_v[23:16] + 50) % 255;
+						Green = (RGB_wall_v[15:8] + 50) % 255;
+						Blue = (RGB_wall_v[7:0] + 50) % 255;
+					end
+					else begin
+						Red = (RGB_wall_v[23:16] + 100) % 255;
+						Green = (RGB_wall_v[15:8] + 100) % 255;
+						Blue = (RGB_wall_v[7:0] + 100) % 255;
+					end
 				end
 			end
+			
+			else if (is_wall4 && (count4 < 3)) begin
+				wall_addr_v = (DrawX - wallX4) + ((DrawY - wallY4) << 3'd5);
+				if (RGB_wall_v != 24'hFF0000) begin
+					if(count4 == 0) begin
+						Red = RGB_wall_v[23:16];
+						Green = RGB_wall_v[15:8];
+						Blue = RGB_wall_v[7:0];
+					end
+					else if(count4 == 1) begin
+						Red = (RGB_wall_v[23:16] + 50) % 255;
+						Green = (RGB_wall_v[15:8] + 50) % 255;
+						Blue = (RGB_wall_v[7:0] + 50) % 255;
+					end
+					else begin
+						Red = (RGB_wall_v[23:16] + 100) % 255;
+						Green = (RGB_wall_v[15:8] + 100) % 255;
+						Blue = (RGB_wall_v[7:0] + 100) % 255;
+					end
+				end
+			end
+			
 		end
 	end
 endmodule

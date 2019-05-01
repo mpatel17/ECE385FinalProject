@@ -46,7 +46,7 @@ module tanks_toplevel( input               CLOCK_50,
                                  DRAM_CLK      //SDRAM Clock
                     );
 
-    logic Reset_h, Clk;
+    logic Reset_h, Clk, Reset2;
     logic [15:0] keycode;
 	 logic [15:0] keycode2;
 	 logic [7:0] keycode_p1;
@@ -56,6 +56,10 @@ module tanks_toplevel( input               CLOCK_50,
     always_ff @ (posedge Clk) begin
         Reset_h <= ~(KEY[0]);        // The push buttons are active low
     end
+	 
+//	 always_ff @ (posedge VGA_VS) begin
+//		Reset2 <= ~(KEY[0]);
+//	 end
 
     logic [1:0] hpi_addr;
     logic [15:0] hpi_data_in, hpi_data_out;
@@ -72,6 +76,7 @@ module tanks_toplevel( input               CLOCK_50,
 	 logic [7:0] count;
 	 logic Clk_2;
 	 logic can_move1, can_move2, tank1_alive, tank2_alive;
+	 logic [2:0] count1, count2, count3, count4;
 
     // Interface between NIOS II and EZ-OTG chip
     hpi_io_intf hpi_io_inst(
@@ -183,20 +188,22 @@ module tanks_toplevel( input               CLOCK_50,
 //						  );
 
 	 wall walls(.Clk(Clk), .Reset(Reset_h),
-					.frame_clk(frame_clk),
+					.frame_clk(VGA_VS),
 					.DrawX(DrawX), .DrawY(DrawY),
 					.is_wall1(is_wall1), .is_wall2(is_wall2), .is_wall3(is_wall3), .is_wall4(is_wall4),
 					.X1(wallX1), .X2(wallX2), .X3(wallX3), .X4(wallX4),
 					.Y1(wallY1), .Y2(wallY2), .Y3(wallY3), .Y4(wallY4)
 					);
 					
-	 collision hit(.X1(wallX1), .Y1(wallY1), .X2(wallX2), .Y2(wallY2), .X3(wallX3), .Y3(wallY3), .X4(wallX4), .Y4(wallY4),
+	 collision hit(.Clk(VGA_VS), .Reset(~KEY[0]),
+						.X1(wallX1), .Y1(wallY1), .X2(wallX2), .Y2(wallY2), .X3(wallX3), .Y3(wallY3), .X4(wallX4), .Y4(wallY4),
 						.X_Tank1(tank_X1), .Y_Tank1(tank_Y1), .X_Tank2(tank_X2), .Y_Tank2(tank_Y2), 
 						.saveX1(saveX1), .saveY1(saveY1), .saveX2(saveX2), .saveY2(saveY2),
 						.X_Bullet1(bullet_X1), .Y_Bullet1(bullet_Y1), .X_Bullet2(bullet_X2), .Y_Bullet2(bullet_Y2),
 						.tank_dir1(tank_dir1), .tank_dir2(tank_dir2), .bullet_dir1(bullet_dir1), .bullet_dir2(bullet_dir2),
 						.can_move1(can_move1), .can_move2(can_move2), .tank1_alive(tank1_alive), .tank2_alive(tank2_alive),
-						.hit1(hit1_2), .hit2(hit2_2)
+						.hit1(hit1_2), .hit2(hit2_2),
+						.count1(count1), .count2(count2), .count3(count3), .count4(count4)
 						);
 
     color_mapper color_instance( //.start_game(start_game), .menu_num(menu_num), .menuX(menuX), .menuY(menuY), menuboxX(menuboxX), .menuboxY(menuboxY),
@@ -209,15 +216,16 @@ module tanks_toplevel( input               CLOCK_50,
 											.tankX1(tank_X1), .tankX2(tank_X2), .tankY1(tank_Y1), .tankY2(tank_Y2),
 											.wallX1(wallX1), .wallX2(wallX2), .wallX3(wallX3), .wallX4(wallX4),
 											.wallY1(wallY1), .wallY2(wallY2), .wallY3(wallY3), .wallY4(wallY4),
+											.count1(count1), .count2(count2), .count3(count3), .count4(count4),
 											.bulletX1(bullet_X1), .bulletY1(bullet_Y1), .bulletX2(bullet_X2), .bulletY2(bullet_Y2),
 											.Clk(Clk), .Reset(Reset_h),
 											.VGA_R(VGA_R), .VGA_G(VGA_G), .VGA_B(VGA_B)
 											);
 
     // Display keycode on hex display
-    HexDriver hex_inst_0 (tank1_alive, HEX0);
-//    HexDriver hex_inst_1 (hit1_2, HEX1);
-	 HexDriver hex_inst_2 (tank2_alive, HEX2);
-//	 HexDriver hex_inst_3 (hit2_2, HEX3);
+    HexDriver hex_inst_0 (count1, HEX0);
+    HexDriver hex_inst_1 (count2, HEX1);
+	 HexDriver hex_inst_2 (count3, HEX2);
+	 HexDriver hex_inst_3 (count4, HEX3);
 
 endmodule

@@ -12,7 +12,7 @@ module  frameRAM_Player2
 		output logic [23:0] data_Out
 );
 
-logic [23:0] palette [1:0];
+logic [23:0] palette [0:1];
 logic [2:0] index;
 
 // mem has width of 2 bits and a total of 12000 addresses
