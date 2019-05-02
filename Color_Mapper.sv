@@ -15,9 +15,11 @@
 
 // color_mapper: Decide which color to be output to VGA for each pixel.
 module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_alive, tank2_alive,
-							 input			is_wall1, is_wall2, is_wall3, is_wall4,
+							 input			is_wall1, is_wall2, is_wall3, is_wall4, 
+							 input 			is_timer_one, is_timer_ten, is_timer_hund,
 							 input	[1:0] hit1, hit2,
 							 input	[2:0] tank_dir1, tank_dir2,
+							 input	[3:0] one_sec, ten_sec, hund_sec,
 							 input   [9:0] DrawX, DrawY,       // Current pixel coordinates
 							 input	[9:0] tankX1, tankX2, tankY1, tankY2, bulletX1, bulletY1, bulletX2, bulletY2,
 							 input	[9:0] wallX1, wallX2, wallX3, wallX4, wallY1, wallY2, wallY3, wallY4,
@@ -27,12 +29,13 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
                      );
 
 	 logic [9:0] gameoverX, gameoverY, playerX, playerY;
+	 logic [9:0] timer_oneX, timer_oneY, timer_tenX, timerY;
 
     logic [7:0] Red, Green, Blue;
-	 logic [18:0] tank_addr, bullet_addr, wall_addr_v, wall_addr_h, gameover_addr, p1_addr, p2_addr, death_addr;
+	 logic [18:0] tank_addr, bullet_addr, wall_addr_v, wall_addr_h, gameover_addr, p1_addr, p2_addr, death_addr, timer_addr, draw_addr;
 	 logic [23:0] RGB_tanku, RGB_tankr, RGB_tankl, RGB_tankd, RGB_bullet, RGB_wall_v, RGB_wall_h, RGB_gameover, RGB_p1, RGB_p2;
-	 logic [23:0] RGB_death, RGB_death1, RGB_death2, RGB_death3, RGB_death4, RGB_death5, RGB_normal;
-	 logic flag1, flag1_in, flag2, flag2_in;
+	 logic [23:0] RGB_death, RGB_death1, RGB_death2, RGB_death3, RGB_death4, RGB_death5, RGB_normal, RGB_timer, RGB_draw;
+	 logic flag1, flag1_in, flag2, flag2_in, flag3, flag3_in;
 	 logic [4:0] death_counter;
 
     // Output colors to VGA
@@ -44,6 +47,10 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
 	 assign playerX = 10'd314;
 	 assign playerY = 10'd232;
 	 assign RGB_normal = 24'hb7fe7b;
+	 assign timer_oneX = 10'd604;
+	 assign timer_tenX = 10'd572;
+	 assign timer_hundX = 10'd540;
+	 assign timerY = 10'd0;
 
 	 frameRAM_Tank_1 tank_u(.read_address(tank_addr), .Clk(Clk),
 								  .data_Out(RGB_tanku)
@@ -99,17 +106,26 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
 	 frameRAM_death5 death5 (.read_address(death_addr), .Clk(Clk),
 									 .data_Out(RGB_death5)
 									 );
-
+									 
+	 frameRAM_numbers numbers (.read_address(timer_addr), .Clk(Clk),
+										.data_Out(RGB_timer)
+										);
+										
+	 frameRAM_GameOverDraw gamedraw (.read_address(draw_addr), .Clk(Clk),
+											   .data_Out(RGB_draw)
+											  );
 	 
 	
 	 always_ff @ (posedge frame_clk or posedge Reset) begin
 		if (Reset) begin
 			flag1 <= 1'b0;
 			flag2 <= 1'b0;
+			flag3 <= 1'b0;
 		end
 		else begin
 			flag1 <= flag1_in;
 			flag2 <= flag2_in;
+			flag3 <= flag3_in;
 			if (flag1 || flag2) begin
 				if (death_counter <= 5'd25)
 					death_counter <= death_counter + 1'b1;
@@ -126,6 +142,7 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
 
 		flag1_in = flag1;
 		flag2_in = flag2;
+		flag3_in = flag3;
 		tank_addr = 18'd0;
 		bullet_addr = 18'd0;
 		wall_addr_h = 18'd0;
@@ -135,17 +152,35 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
 		p2_addr = 18'd0;
 		death_addr = 18'd0;
 		RGB_death = 24'd0;
+		timer_addr = 18'd0;
+		draw_addr = 18'd0;
 		
 		if(~tank1_alive)
 			flag1_in = 1'b1;
 		if(~tank2_alive)
 			flag2_in = 1'b1;
+		if((hund_sec == 4'd2) && (ten_sec == 4'd5) && (one_sec == 4'd0))
+			flag3_in = 1'b1;
 			
 		Red = 8'd183;
 		Green = 8'd254;
 		Blue = 8'd123;
+		
+		if(flag3) begin
+			Red = 8'h00;
+			Green = 8'h00;
+			Blue = 8'h00;
 			
-		if((flag1 || flag2) && death_counter > 25) begin
+			if(DrawX > 250 && DrawX < 378 && DrawY > 200 && DrawY < 264) begin
+				draw_addr = (DrawX - gameoverX) + ((DrawY - gameoverY) << 7);
+				if(RGB_draw != 24'hFF0000) begin
+					Red = RGB_draw[23:16];
+					Green = RGB_draw[15:8];
+					Blue = RGB_draw[7:0];
+				end
+			end 
+		end
+		else if((flag1 || flag2) && death_counter > 25) begin
 			Red = 8'h00;
 			Green = 8'h00;
 			Blue = 8'h00;
@@ -403,6 +438,32 @@ module  color_mapper (input			is_tank1, is_tank2, is_bullet1, is_bullet2, tank1_
 				end
 			end
 			
+			else if (is_timer_one) begin
+				timer_addr = (DrawX - timer_oneX + (one_sec << 3'd5)) + (DrawY * 320);
+				if(RGB_timer != 24'hFFFFFF) begin
+					Red = RGB_timer[23:16];
+					Green = RGB_timer[15:8];
+					Blue = RGB_timer[7:0];
+				end
+			end
+			
+			else if (is_timer_ten) begin
+				timer_addr = (DrawX - timer_tenX + (ten_sec << 3'd5)) + (DrawY * 320);
+				if(RGB_timer != 24'hFFFFFF) begin
+					Red = RGB_timer[23:16];
+					Green = RGB_timer[15:8];
+					Blue = RGB_timer[7:0];
+				end
+			end
+			
+			else if (is_timer_hund) begin
+				timer_addr = (DrawX - timer_hundX + (hund_sec << 3'd5)) + (DrawY * 320); 
+				if(RGB_timer != 24'hFFFFFF) begin
+					Red = RGB_timer[23:16];
+					Green = RGB_timer[15:8];
+					Blue = RGB_timer[7:0];
+				end
+			end
 		end
 	end
 endmodule

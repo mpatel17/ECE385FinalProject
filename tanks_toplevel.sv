@@ -73,6 +73,8 @@ module tanks_toplevel( input               CLOCK_50,
 	 logic Clk_2;
 	 logic can_move1, can_move2, tank1_alive, tank2_alive;
 	 logic [2:0] count1, count2, count3, count4;
+	 logic [3:0] one_sec, ten_sec, hund_sec;
+	 logic is_timer_one, is_timer_ten, is_timer_hund;
 
     // Interface between NIOS II and EZ-OTG chip
     hpi_io_intf hpi_io_inst(
@@ -135,10 +137,10 @@ module tanks_toplevel( input               CLOCK_50,
 								  );
 
 
-//		timer timer( .Clk(Clk), .Reset(Reset), .DrawX(DrawX), .DrawY(DrawY),
-//    						.one_sec(one_sec), .one_min(one_min),
-//    						.ten_sec(ten_sec), .ten_min(ten_min)
-//    						);
+	 timer timer( .Clk(Clk), .Reset(Reset_h), .DrawX(DrawX), .DrawY(DrawY),
+    						.one_sec(one_sec), .ten_sec(ten_sec), .hund_sec(hund_sec),
+    						.is_timer_one(is_timer_one), .is_timer_ten(is_timer_ten), .is_timer_hund(is_timer_hund)
+    						);
 
 	 tank_key tank_p1(.Clk(Clk), .Reset(Reset_h),
 						  .frame_clk(VGA_VS),
@@ -192,6 +194,8 @@ module tanks_toplevel( input               CLOCK_50,
 											.is_wall1(is_wall1), .is_wall2(is_wall2), .is_wall3(is_wall3), .is_wall4(is_wall4),
 											.hit1(hit1 & hit1_2), .hit2(hit2 & hit2_2),
 											.tank_dir1(tank_dir1), .tank_dir2(tank_dir2),
+											.is_timer_one(is_timer_one), .is_timer_ten(is_timer_ten), .is_timer_hund(is_timer_hund), 
+											.one_sec(one_sec), .ten_sec(ten_sec), .hund_sec(hund_sec),
 											.DrawX(DrawX), .DrawY(DrawY),
 											.tankX1(tank_X1), .tankX2(tank_X2), .tankY1(tank_Y1), .tankY2(tank_Y2),
 											.wallX1(wallX1), .wallX2(wallX2), .wallX3(wallX3), .wallX4(wallX4),
@@ -203,9 +207,9 @@ module tanks_toplevel( input               CLOCK_50,
 											);
 
     // Display keycode on hex display
-    HexDriver hex_inst_0 (count1, HEX0);
-    HexDriver hex_inst_1 (count2, HEX1);
-	 HexDriver hex_inst_2 (count3, HEX2);
+    HexDriver hex_inst_0 (one_sec, HEX0);
+    HexDriver hex_inst_1 (ten_sec, HEX1);
+	 HexDriver hex_inst_2 (hund_sec, HEX2);
 	 HexDriver hex_inst_3 (count4, HEX3);
 
 endmodule
