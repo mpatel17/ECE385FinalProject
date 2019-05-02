@@ -2,7 +2,6 @@ module  wall (	input 	Clk,                // 50 MHz clock
 								Reset,              // Active-high reset signal
 								frame_clk,          // The clock indicating a new frame (~60Hz)
 					input [9:0]   DrawX, DrawY, // Current pixel coordinates
-//					input 	num_walls,		//Tells how many walls should be set up
 					output  is_wall1, is_wall2, is_wall3, is_wall4, is_any_wall,     // Whether current pixel belongs to wall
 					output [9:0] X1, X2, X3, X4, Y1, Y2, Y3, Y4
 					);
@@ -17,8 +16,6 @@ module  wall (	input 	Clk,                // 50 MHz clock
 		parameter [9:0] Hor_Height = 10'd32;
 
 		logic [9:0] counter;
-		
-		assign is_any_wall = is_wall1 || is_wall2 || is_wall3 || is_wall4;
 
 		assign X1 = 10'd50;
 		assign Y1 = 10'd100;
