@@ -56,10 +56,6 @@ module tanks_toplevel( input               CLOCK_50,
     always_ff @ (posedge Clk) begin
         Reset_h <= ~(KEY[0]);        // The push buttons are active low
     end
-	 
-//	 always_ff @ (posedge VGA_VS) begin
-//		Reset2 <= ~(KEY[0]);
-//	 end
 
     logic [1:0] hpi_addr;
     logic [15:0] hpi_data_in, hpi_data_out;
@@ -138,11 +134,6 @@ module tanks_toplevel( input               CLOCK_50,
 								  .keycode_p1(keycode_p1), .keycode_p2(keycode_p2)
 								  );
 
-//    menu menu_select( .Clk(Clk), .Reset(Reset_h), .frame_clk(VGA_VS),
-//                     .DrawX(DrawX), .DrawY(DrawY),
-//                     .keycode(keycode_p2),
-//                     .menu_num(menu_num), .start_game(start_game)
-//                    );
 
 //		timer timer( .Clk(Clk), .Reset(Reset), .DrawX(DrawX), .DrawY(DrawY),
 //    						.one_sec(one_sec), .one_min(one_min),
@@ -163,7 +154,7 @@ module tanks_toplevel( input               CLOCK_50,
 						  .can_move(can_move1)
 						  );
 
-	 tank_key tank_p3(.Clk(Clk), .Reset(Reset_h),
+	 tank_key tank_p2(.Clk(Clk), .Reset(Reset_h),
 							.frame_clk(VGA_VS),
 							.player(1'b1),
 							.bull_hit(hit2_2),
@@ -176,16 +167,6 @@ module tanks_toplevel( input               CLOCK_50,
 							.keycode(keycode_p2),
 							.can_move(can_move2)
 							);
-
-//	 tank_ai tank_p2(.Clk(Clk), .Reset(Reset_h),
-//						  .frame_clk(VGA_VS),
-//						  .DrawX(DrawX), .DrawY(DrawY),
-//						  .is_tank(is_tank2),
-//						  .tank_dir(tank_dir2),
-//						  .tank_X(tank_X2), .tank_Y(tank_Y2),
-//						  .count(count),
-//						  .Clk_2(Clk_2)
-//						  );
 
 	 wall walls(.Clk(Clk), .Reset(Reset_h),
 					.frame_clk(VGA_VS),
@@ -206,8 +187,7 @@ module tanks_toplevel( input               CLOCK_50,
 						.count1(count1), .count2(count2), .count3(count3), .count4(count4)
 						);
 
-    color_mapper color_instance( //.start_game(start_game), .menu_num(menu_num), .menuX(menuX), .menuY(menuY), menuboxX(menuboxX), .menuboxY(menuboxY),
-											.is_tank1(is_tank1), .is_tank2(is_tank2), .is_bullet1(is_bullet1), .is_bullet2(is_bullet2),
+    color_mapper color_instance( .is_tank1(is_tank1), .is_tank2(is_tank2), .is_bullet1(is_bullet1), .is_bullet2(is_bullet2),
 											.tank1_alive(tank1_alive), .tank2_alive(tank2_alive),
 											.is_wall1(is_wall1), .is_wall2(is_wall2), .is_wall3(is_wall3), .is_wall4(is_wall4),
 											.hit1(hit1 & hit1_2), .hit2(hit2 & hit2_2),

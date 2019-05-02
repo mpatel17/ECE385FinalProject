@@ -375,25 +375,4 @@ module collision (input Clk, Reset,
 				
 		end
 			
-
-//			//Bullet collisions with tanks
-//			if (X_Bullet <= X_Tank + Tank_Size) begin
-//			  hit = 2'b10;
-//			  tank_hit = 1'b1;
-//			end
-//
-//			else if (X_Bullet + Bullet_Width >= X_Tank) begin
-//			  hit = 2'b10;
-//			  tank_hit = 1'b1;
-//			end
-//
-//			else if (Y_Bullet <= Y_Tank + Tank_Size) begin
-//			  hit = 2'b10;
-//			  tank_hit = 1'b1;
-//			end
-//
-//			else if (Y_Bullet + Bullet_Height >= Y_Tank) begin
-//			  hit = 2'b10;
-//			  tank_hit = 1'b1;
-//		end
 endmodule 

@@ -62,7 +62,7 @@ module  tank_key ( input         Clk,                // 50 MHz clock
 		bullet_dir = 3'd1;
 		bullet_dir_in = 3'd1;
 		hit = 2'b00;
-		hit_in = 2'b00;	//00 = no bullet on screen, 01 = bullet on screen, 10 = bullet hit wall
+		hit_in = 2'b00;	//00 = no bullet on screen, 01 = bullet on screen
 	 end
 	 
     // Detect rising edge of frame_clk
