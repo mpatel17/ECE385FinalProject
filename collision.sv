@@ -75,6 +75,8 @@ module collision (input Clk, Reset,
 						can_move1 = 1'b0;
 					else if ( ((Y_Tank1 + neg_step) == (Y4 + V_Height)) && ((X_Tank1 + Tank_Size) > X4) && (X_Tank1 < (X4 + V_Width)) && (count4 < 3) )
 						can_move1 = 1'b0;
+					else if ( ((Y_Tank1 + neg_step) == (Y_Tank2 + Tank_Size)) && ((X_Tank1 + Tank_Size) > X_Tank2) && (X_Tank1 < (X_Tank2 + Tank_Size)) )
+						can_move1 = 1'b0;
 				end
 				3'd2: begin	// moving right
 					if ( ((X_Tank1 + Tank_Size + step) == X1) && ((Y_Tank1 + Tank_Size) > Y1) && (Y_Tank1 < (Y1 + H_Height)) && (count1 < 3) )
@@ -84,6 +86,8 @@ module collision (input Clk, Reset,
 					else if ( ((X_Tank1 + Tank_Size + step) == X3) && ((Y_Tank1 + Tank_Size) > Y3) && (Y_Tank1 < (Y3 + H_Height)) && (count3 < 3) )
 						can_move1 = 1'b0;
 					else if ( ((X_Tank1 + Tank_Size + step) == X4) && ((Y_Tank1 + Tank_Size) > Y4) && (Y_Tank1 < (Y4 + V_Height)) && (count4 < 3) )
+						can_move1 = 1'b0;
+					else if ( ((X_Tank1 + Tank_Size + step) == X_Tank2) && ((Y_Tank1 + Tank_Size) > Y_Tank2) && (Y_Tank1 < (Y_Tank2 + Tank_Size)) )
 						can_move1 = 1'b0;
 				end
 				3'd3: begin	// moving left
@@ -95,6 +99,8 @@ module collision (input Clk, Reset,
 						can_move1 = 1'b0;
 					else if ( ((X_Tank1 + neg_step) == (X4 + V_Width)) && ((Y_Tank1 + Tank_Size) > Y4) && (Y_Tank1 < (Y4 + V_Height)) && (count4 < 3) )
 						can_move1 = 1'b0;
+					else if ( ((X_Tank1 + neg_step) == (X_Tank2 + Tank_Size)) && ((Y_Tank1 + Tank_Size) > Y_Tank2) && (Y_Tank1 < (Y_Tank2 + Tank_Size)) )
+						can_move1 = 1'b0;
 				end	
 				3'd4: begin	// moving down
 					if ( ((Y_Tank1 + Tank_Size + step) == Y1) && ((X_Tank1 + Tank_Size) > X1) && (X_Tank1 < (X1 + H_Width)) && (count1 < 3) )
@@ -104,6 +110,8 @@ module collision (input Clk, Reset,
 					else if ( ((Y_Tank1 + Tank_Size + step) == Y3) && ((X_Tank1 + Tank_Size) > X3) && (X_Tank1 < (X3 + H_Width)) && (count3 < 3) )
 						can_move1 = 1'b0;
 					else if ( ((Y_Tank1 + Tank_Size + step) == Y4) && ((X_Tank1 + Tank_Size) > X4) && (X_Tank1 < (X4 + V_Width)) && (count4 < 3) )
+						can_move1 = 1'b0;
+					else if ( ((Y_Tank1 + Tank_Size + step) == Y_Tank2) && ((X_Tank1 + Tank_Size) > X_Tank2) && (X_Tank1 < (X_Tank2 + Tank_Size)) )
 						can_move1 = 1'b0;
 				end
 				default:
@@ -120,6 +128,8 @@ module collision (input Clk, Reset,
 						can_move2 = 1'b0;
 					else if ( ((Y_Tank2 + neg_step) == (Y4 + V_Height)) && ((X_Tank2 + Tank_Size) > X4) && (X_Tank2 < (X4 + V_Width)) && (count4 < 3) )
 						can_move2 = 1'b0;
+					else if ( ((Y_Tank2 + neg_step) == (Y_Tank1 + Tank_Size)) && ((X_Tank2 + Tank_Size) > X_Tank1) && (X_Tank2 < (X_Tank1 + Tank_Size)) )
+						can_move2 = 1'b0;
 				end
 				3'd2: begin	// moving right
 					if ( ((X_Tank2 + Tank_Size + step) == X1) && ((Y_Tank2 + Tank_Size) > Y1) && (Y_Tank2 < (Y1 + H_Height)) && (count1 < 3) )
@@ -129,6 +139,8 @@ module collision (input Clk, Reset,
 					else if ( ((X_Tank2 + Tank_Size + step) == X3) && ((Y_Tank2 + Tank_Size) > Y3) && (Y_Tank2 < (Y3 + H_Height)) && (count3 < 3) )
 						can_move2 = 1'b0;
 					else if ( ((X_Tank2 + Tank_Size + step) == X4) && ((Y_Tank2 + Tank_Size) > Y4) && (Y_Tank2 < (Y4 + V_Height)) && (count4 < 3) )
+						can_move2 = 1'b0;
+					else if ( ((X_Tank2 + Tank_Size + step) == X_Tank1) && ((Y_Tank2 + Tank_Size) > Y_Tank1) && (Y_Tank2 < (Y_Tank1 + Tank_Size)) )
 						can_move2 = 1'b0;
 				end
 				3'd3: begin	// moving left
@@ -140,6 +152,8 @@ module collision (input Clk, Reset,
 						can_move2 = 1'b0;
 					else if ( ((X_Tank2 + neg_step) == (X4 + V_Width)) && ((Y_Tank2 + Tank_Size) > Y4) && (Y_Tank2 < (Y4 + V_Height)) && (count4 < 3) )
 						can_move2 = 1'b0;
+					else if ( ((X_Tank2 + neg_step) == (X_Tank1 + Tank_Size)) && ((Y_Tank2 + Tank_Size) > Y_Tank1) && (Y_Tank2 < (Y_Tank1 + Tank_Size)) )
+						can_move2 = 1'b0;
 				end	
 				3'd4: begin	// moving down
 					if ( ((Y_Tank2 + Tank_Size + step) == Y1) && ((X_Tank2 + Tank_Size) > X1) && (X_Tank2 < (X1 + H_Width)) && (count1 < 3) )
@@ -149,6 +163,8 @@ module collision (input Clk, Reset,
 					else if ( ((Y_Tank2 + Tank_Size + step) == Y3) && ((X_Tank2 + Tank_Size) > X3) && (X_Tank2 < (X3 + H_Width)) && (count3 < 3) )
 						can_move2 = 1'b0;
 					else if ( ((Y_Tank2 + Tank_Size + step) == Y4) && ((X_Tank2 + Tank_Size) > X4) && (X_Tank2 < (X4 + V_Width)) && (count4 < 3) )
+						can_move2 = 1'b0;
+					else if ( ((Y_Tank2 + Tank_Size + step) == Y_Tank1) && ((X_Tank2 + Tank_Size) > X_Tank1) && (X_Tank2 < (X_Tank1 + Tank_Size)) )
 						can_move2 = 1'b0;
 				end
 				default:
@@ -173,9 +189,11 @@ module collision (input Clk, Reset,
 						hit1 = 2'b00;
 						count4_in = count4 + 1'b1;
 					end
-					if ( ((Y_Bullet1 + neg_step_b) <= (Y_Tank2 + Tank_Size)) && ((X_Bullet1 + Bullet_Size) > X_Tank2) && (X_Bullet1 < (X_Tank2 + Tank_Size)) && (saveY1 > (Y_Tank2 + Tank_Size)) ) begin
-						hit1 = 2'b00;
-						tank2_alive = 1'b0;
+					if ( ((Y_Bullet1 + neg_step_b) <= (Y_Tank2 + Tank_Size)) && ((Y_Bullet1 + Bullet_Size + neg_step_b) >= Y_Tank2) ) begin
+						if ( ((X_Bullet1 + Bullet_Size) > X_Tank2) && (X_Bullet1 < (X_Tank2 + Tank_Size)) && (saveY1 > (Y_Tank2 + Tank_Size)) ) begin
+							hit1 = 2'b00;
+							tank2_alive = 1'b0;
+						end
 					end
 				end
 				3'd2: begin	// moving right
@@ -195,9 +213,11 @@ module collision (input Clk, Reset,
 						hit1 = 2'b00;
 						count4_in = count4 + 1'b1;
 					end
-					if ( ((X_Bullet1 + Bullet_Size + step_b) >= X_Tank2) && ((Y_Bullet1 + Bullet_Size) > Y_Tank2) && (Y_Bullet1 < (Y_Tank2 + Tank_Size)) && ((saveX1 + Tank_Size) < X_Tank2) ) begin
-						hit1 = 2'b00;
-						tank2_alive = 1'b0;
+					if ( ((X_Bullet1 + Bullet_Size + step_b) >= X_Tank2) && ((X_Bullet1 + step_b) <= (X_Tank2 + Tank_Size)) ) begin
+						if ( ((Y_Bullet1 + Bullet_Size) > Y_Tank2) && (Y_Bullet1 < (Y_Tank2 + Tank_Size)) && ((saveX1 + Tank_Size) < X_Tank2) ) begin
+							hit1 = 2'b00;
+							tank2_alive = 1'b0;
+						end
 					end
 				end
 				3'd3: begin	// moving left
@@ -217,9 +237,11 @@ module collision (input Clk, Reset,
 						hit1 = 2'b00;
 						count4_in = count4 + 1'b1;
 						end
-					if ( ((X_Bullet1 + neg_step_b) <= (X_Tank2 + Tank_Size)) && ((Y_Bullet1 + Bullet_Size) > Y_Tank2) && (Y_Bullet1 < (Y_Tank2 + Tank_Size)) && (saveX1 > (X_Tank2 + Tank_Size)) ) begin
-						hit1 = 2'b00;
-						tank2_alive = 1'b0;
+					if ( ((X_Bullet1 + neg_step_b) <= (X_Tank2 + Tank_Size)) && ((X_Bullet1 + Bullet_Size + neg_step_b) >= X_Tank2) ) begin
+						if ( ((Y_Bullet1 + Bullet_Size) > Y_Tank2) && (Y_Bullet1 < (Y_Tank2 + Tank_Size)) && (saveX1 > (X_Tank2 + Tank_Size)) ) begin
+							hit1 = 2'b00;
+							tank2_alive = 1'b0;
+						end
 					end
 				end	
 				3'd4: begin	// moving down
@@ -239,9 +261,11 @@ module collision (input Clk, Reset,
 						hit1 = 2'b00;
 						count4_in = count4 + 1'b1;
 						end
-					if ( ((Y_Bullet1 + Bullet_Size + step_b) >= Y_Tank2) && ((X_Bullet1 + Bullet_Size) > X_Tank2) && (X_Bullet1 < (X_Tank2 + Tank_Size)) && ((saveY1 + Tank_Size) < Y_Tank2) ) begin
-						hit1 = 2'b00;
-						tank2_alive = 1'b0;
+					if ( ((Y_Bullet1 + Bullet_Size + step_b) >= Y_Tank2) && ((Y_Bullet1 + step_b) <= (Y_Tank2 + Tank_Size)) ) begin
+						if ( ((X_Bullet1 + Bullet_Size) > X_Tank2) && (X_Bullet1 < (X_Tank2 + Tank_Size)) && ((saveY1 + Tank_Size) < Y_Tank2) ) begin
+							hit1 = 2'b00;
+							tank2_alive = 1'b0;
+						end
 					end
 				end
 				default:
@@ -266,9 +290,11 @@ module collision (input Clk, Reset,
 						hit2 = 2'b00;
 						count4_in = count4 + 1'b1;
 					end
-					if ( ((Y_Bullet2 + neg_step_b) <= (Y_Tank1 + Tank_Size)) && ((X_Bullet2 + Bullet_Size) > X_Tank1) && (X_Bullet2 < (X_Tank1 + Tank_Size)) && (saveY2 > (Y_Tank1 + Tank_Size)) ) begin
-						hit2 = 2'b00;
-						tank1_alive = 1'b0;
+					if ( ((Y_Bullet2 + neg_step_b) <= (Y_Tank1 + Tank_Size)) && ((Y_Bullet2 + Bullet_Size + neg_step_b) >= Y_Tank1) ) begin
+						if ( ((X_Bullet2 + Bullet_Size) > X_Tank1) && (X_Bullet2 < (X_Tank1 + Tank_Size)) && (saveY2 > (Y_Tank1 + Tank_Size)) ) begin
+							hit2 = 2'b00;
+							tank1_alive = 1'b0;
+						end
 					end
 				end
 				3'd2: begin	// moving right
@@ -288,9 +314,11 @@ module collision (input Clk, Reset,
 						hit2 = 2'b00;
 						count4_in = count4 + 1'b1;
 					end
-					if ( ((X_Bullet2 + Bullet_Size + step_b) >= X_Tank1) && ((Y_Bullet2 + Bullet_Size) > Y_Tank1) && (Y_Bullet2 < (Y_Tank1 + Tank_Size)) && ((saveX2 + Tank_Size) < X_Tank1) ) begin
-						hit2 = 2'b00;
-						tank1_alive = 1'b0;
+					if ( ((X_Bullet2 + Bullet_Size + step_b) >= X_Tank1) && ((X_Bullet2 + step_b) <= (X_Tank1 + Tank_Size)) ) begin
+						if ( ((Y_Bullet2 + Bullet_Size) > Y_Tank1) && (Y_Bullet2 < (Y_Tank1 + Tank_Size)) && ((saveX2 + Tank_Size) < X_Tank1) ) begin
+							hit2 = 2'b00;	
+							tank1_alive = 1'b0;
+						end
 					end
 				end
 				3'd3: begin	// moving left
@@ -310,9 +338,11 @@ module collision (input Clk, Reset,
 						hit2 = 2'b00;
 						count4_in = count4 + 1'b1;
 					end
-					if ( ((X_Bullet2 + neg_step_b) <= (X_Tank1 + Tank_Size)) && ((Y_Bullet2 + Bullet_Size) > Y_Tank1) && (Y_Bullet2 < (Y_Tank1 + Tank_Size)) && (saveX2 > (X_Tank1 + Tank_Size)) ) begin
-						hit2 = 2'b00;
-						tank1_alive = 1'b0;
+					if ( ((X_Bullet2 + neg_step_b) <= (X_Tank1 + Tank_Size)) && ((X_Bullet2 + Bullet_Size + neg_step_b) >= X_Tank1) ) begin
+						if ( ((Y_Bullet2 + Bullet_Size) > Y_Tank1) && (Y_Bullet2 < (Y_Tank1 + Tank_Size)) && (saveX2 > (X_Tank1 + Tank_Size)) ) begin
+							hit2 = 2'b00;
+							tank1_alive = 1'b0;
+						end
 					end
 				end	
 				3'd4: begin	// moving down
@@ -332,9 +362,11 @@ module collision (input Clk, Reset,
 						hit2 = 2'b00;
 						count4_in = count4 + 1'b1;
 					end
-					if ( ((Y_Bullet2 + Bullet_Size + step_b) >= Y_Tank1) && ((X_Bullet2 + Bullet_Size) > X_Tank1) && (X_Bullet2 < (X_Tank1 + Tank_Size)) && ((saveY2 + Tank_Size) < Y_Tank1) ) begin
-						hit2 = 2'b00;
-						tank1_alive = 1'b0;
+					if ( ((Y_Bullet2 + Bullet_Size + step_b) >= Y_Tank1) && ((Y_Bullet2 + step_b) <= (Y_Tank1 + Tank_Size)) ) begin
+						if ( ((X_Bullet2 + Bullet_Size) > X_Tank1) && (X_Bullet2 < (X_Tank1 + Tank_Size)) && ((saveY2 + Tank_Size) < Y_Tank1) ) begin
+							hit2 = 2'b00;
+							tank1_alive = 1'b0;
+						end
 					end
 				end
 				default:
